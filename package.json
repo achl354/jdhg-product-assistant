@@ -1,0 +1,17 @@
+{
+  "name": "hovertech-qa-bot",
+  "version": "0.1.0",
+  "description": "Pilot Q&A chat app for JDHG reps to ask questions about the HoverTech product range, grounded strictly in a curated knowledge base.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

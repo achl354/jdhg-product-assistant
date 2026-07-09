@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>HoverTech Product Assistant</title>
+<style>
+  :root {
+    --navy: #1B3F73;
+    --bg: #F7F8FA;
+    --bubble-user: #1B3F73;
+    --bubble-bot: #FFFFFF;
+    --border: #E2E5EA;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 14px 16px;
+    font-weight: 600;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  header .sub {
+    font-size: 12px;
+    font-weight: 400;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    line-height: 1.4;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+  .msg.user {
+    align-self: flex-end;
+    background: var(--bubble-user);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.bot {
+    align-self: flex-start;
+    background: var(--bubble-bot);
+    border: 1px solid var(--border);
+    color: #1F2937;
+    border-bottom-left-radius: 4px;
+  }
+  .msg.error {
+    align-self: flex-start;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    color: #991B1B;
+  }
+  #form {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    border-top: 1px solid var(--border);
+    background: #fff;
+    flex-shrink: 0;
+  }
+  #input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    outline: none;
+  }
+  #send {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 0 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #send:disabled { opacity: 0.5; }
+</style>
+</head>
+<body>
+  <header>
+    JDHG Product Assistant
+    <div class="sub">Pilot &middot; HoverTech &amp; TrenGuard &middot; answers only from a curated knowledge base</div>
+  </header>
+  <div id="log"></div>
+  <form id="form">
+    <input id="input" type="text" placeholder="Ask about HoverTech or TrenGuard..." autocomplete="off" />
+    <button id="send" type="submit">Send</button>
+  </form>
+
+  <script>
+    const log = document.getElementById("log");
+    const form = document.getElementById("form");
+    const input = document.getElementById("input");
+    const send = document.getElementById("send");
+    let history = [];
+
+    function addMessage(text, cls) {
+      const div = document.createElement("div");
+      div.className = "msg " + cls;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      return div;
+    }
+
+    addMessage("Hi, I'm the JDHG Product Assistant pilot. Ask me about specs, ARTG/GMDN details, usage steps, or warnings for the HoverTech range or TrenGuard.", "bot");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage(message, "user");
+      input.value = "";
+      send.disabled = true;
+      const thinking = addMessage("...", "bot");
+
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, history })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          thinking.remove();
+          addMessage(data.error || "Something went wrong.", "error");
+          return;
+        }
+
+        thinking.remove();
+        addMessage(data.reply, "bot");
+        history.push({ role: "user", content: message });
+        history.push({ role: "assistant", content: data.reply });
+      } catch (err) {
+        thinking.remove();
+        addMessage("Could not reach the assistant. Check your connection and try again.", "error");
+      } finally {
+        send.disabled = false;
+        input.focus();
+      }
+    });
+  </script>
+</body>
+</html>
