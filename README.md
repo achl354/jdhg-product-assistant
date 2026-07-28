@@ -1,6 +1,6 @@
 # JDHG Product Assistant — pilot
 
-A small chat web app for JDHG reps to ask questions about the HoverTech range and TrenGuard, grounded only in a curated set of vetted documents (see `knowledge/_sources.md`).
+A small chat web app for JDHG reps to ask questions about JDHG's product range, grounded only in a curated set of vetted documents (see `knowledge/_sources.md`). HoverTech and TrenGuard have full manufacturer IFU/usage manuals and ARTG certificates loaded; the rest of the catalogue (NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, Easi Rider/Mover) currently has only marketing collateral (flyers/booklets/fact sheets) loaded — the bot is instructed to present that tier accordingly rather than imply IFU-grade certainty.
 
 ## Why it's built this way
 
@@ -34,11 +34,11 @@ Free/starter Render tiers sleep after inactivity and take a few seconds to wake 
 
 ## Updating the knowledge base
 
-Edit or add files under `knowledge/`. Each file should be a self-contained markdown document. Update `knowledge/_sources.md` with where the content came from and its date, so the bot's citations stay accurate. Restart the server to pick up changes (loaded once at startup).
+Edit or add files under `knowledge/`. Each file should be a self-contained markdown document. Update `knowledge/_sources.md` with where the content came from and its date, so the bot's citations stay accurate. Restart the server to pick up changes (loaded once at startup). `knowledge/marketing/` is pulled from a SharePoint site rather than hand-written — see `MARKETING_RESYNC.md` for how to refresh it.
 
 ## Known limitations (pilot scope)
 
-- HoverTech and TrenGuard only — no other product lines.
+- HoverTech and TrenGuard have full IFU/manual/ARTG-grade documentation. The rest of the catalogue (see `knowledge/marketing/`) currently has marketing collateral only — flyers, booklets, fact sheets pulled from the JD Sales & Marketing Hub SharePoint site — not manufacturer IFUs or ARTG certificates. Real IFU/manual documents for these lines can be dropped in later following the same pattern as HoverTech/TrenGuard.
 - Deliberately excludes the ~100-file legacy `Info From Suppliers/HoverTech (Supplier) Info` SharePoint archive (2011-2024) and the scattered per-hospital TrenGuard evaluation forms/quotes (2019-2021) sitting in individual rep folders — the bot will say it doesn't have something if it's only in that older material.
 - For TrenGuard, JDHG's 2024 User Guide is treated as authoritative over the manufacturer's original 2015 IFU where they conflict — see the note in `knowledge/trenguard-usage-and-ifu.md`.
 - Basic auth (single shared username/password) only — fine for a small pilot, not real per-user access control or audit logging. Revisit if this becomes permanent.

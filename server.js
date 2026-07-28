@@ -76,18 +76,82 @@ const KNOWLEDGE_INDEX = [
   {
     file: "competitive-positioning-hovermatt-trenguard.md",
     keywords: ["compet", "compar", "xodus", "pink pad", " vs ", "versus", "rebuttal"]
+  },
+  // --- Marketing collateral (JD Sales & Marketing Hub) — see knowledge/_sources.md
+  // for the "marketing collateral, not IFU/regulatory" caveat on all of these.
+  {
+    file: "marketing/netzero.md",
+    keywords: ["netzero", "net zero", "bioplastic", "sustainable underpad", "eco-friendly curtain", "recycled curtain"]
+  },
+  {
+    file: "marketing/hygenica.md",
+    keywords: ["hygenica", "fantex", "ipc curtain", "disposable blind", "hospital blind", "roller blind"]
+  },
+  {
+    file: "marketing/medsalv.md",
+    keywords: ["medsalv", "remanufactur", "blended code", "easimove spu", "collection point"]
+  },
+  {
+    file: "marketing/minimaxx.md",
+    keywords: ["minimaxx", "mini maxx", "xxl-rehab", "bariatric wheelchair", "push assist"]
+  },
+  {
+    file: "marketing/albacmat.md",
+    keywords: ["albacmat", "albac mat", "rescue mat", "evacuation mat", "fire evacuation"]
+  },
+  {
+    file: "marketing/carexia.md",
+    keywords: ["carexia", "fpve", "treatment chair", "dialysis chair", "oncology chair"]
+  },
+  {
+    file: "marketing/imove.md",
+    keywords: ["i-move", "imove", "ez-go", "ezgo", "stackable transfer chair", "easyclip", "easyclean", "softsound"]
+  },
+  {
+    file: "marketing/trulife-pressurecare.md",
+    keywords: ["trulife", "azure", "oasis", "pressurecare", "gel pad", "armboard pad", "head ring", "chest roll", "sacral protector", "ards prone", "positioner"]
+  },
+  {
+    file: "marketing/raizer.md",
+    keywords: ["raizer", "liftup", "lifting chair", "fallen person", "floor lift chair"]
+  },
+  {
+    file: "marketing/amigo-pem.md",
+    keywords: ["amigo", "patient escort mover", "pem"]
+  },
+  {
+    file: "marketing/clavia.md",
+    keywords: ["clavia", "fcd", "amb7", "chemo chair", "day surgery stretcher", "lsa surgery"]
+  },
+  {
+    file: "marketing/easi-rider-mover.md",
+    keywords: ["easi rider", "easi mover", "trolley tug", "bin mover", "tow hitch"]
   }
 ];
 
+// Walks knowledge/ one level deep so subfolders (e.g. marketing/) are picked
+// up as `<subfolder>/<file>.md` keys, alongside top-level files.
 function loadAllKnowledgeFiles() {
-  const files = fs
-    .readdirSync(KNOWLEDGE_DIR)
-    .filter((f) => f.endsWith(".md"))
-    .sort();
+  const entries = fs.readdirSync(KNOWLEDGE_DIR, { withFileTypes: true });
+  const relativePaths = [];
 
+  for (const entry of entries) {
+    if (entry.isFile() && entry.name.endsWith(".md")) {
+      relativePaths.push(entry.name);
+    } else if (entry.isDirectory()) {
+      const subFiles = fs
+        .readdirSync(path.join(KNOWLEDGE_DIR, entry.name))
+        .filter((f) => f.endsWith(".md"));
+      for (const f of subFiles) {
+        relativePaths.push(path.join(entry.name, f));
+      }
+    }
+  }
+
+  relativePaths.sort();
   const map = new Map();
-  for (const f of files) {
-    map.set(f, fs.readFileSync(path.join(KNOWLEDGE_DIR, f), "utf-8"));
+  for (const rel of relativePaths) {
+    map.set(rel, fs.readFileSync(path.join(KNOWLEDGE_DIR, rel), "utf-8"));
   }
   return map;
 }
@@ -152,18 +216,18 @@ function basicAuth(req, res, next) {
 // across every request regardless of which knowledge files get routed in.
 const STATIC_INSTRUCTIONS = `You are the JD Healthcare Group Product Assistant, used by sales reps in the field.
 
-You may answer ONLY using the information in the <document> blocks provided in this conversation. This is a pilot covering two product lines only — the HoverTech range (HoverMatt, HoverJack, HoverSling, Q2Roller, SitAssist Pro, HT-Air supply) and TrenGuard (Trendelenburg patient restraint system, plus ArmGuard/FaceGuard/ShroudGuard accessories). No other JDHG product lines are loaded.
+You may answer ONLY using the information in the <document> blocks provided in this conversation. Knowledge base coverage is uneven across JDHG's range: HoverTech (HoverMatt, HoverJack, HoverSling, Q2Roller, SitAssist Pro, HT-Air supply) and TrenGuard (Trendelenburg patient restraint system, plus ArmGuard/FaceGuard/ShroudGuard accessories) have full manufacturer IFU/usage manuals and ARTG/regulatory certificates loaded. Other product lines — currently NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, and Easi Rider/Mover — currently have only JDHG marketing collateral (flyers, booklets, fact sheets) loaded, not manufacturer IFUs or ARTG certificates, unless a document explicitly says otherwise. IFU/manual-grade documentation for these other lines may be added later; when it is, treat it with the same full grounding as HoverTech/TrenGuard.
 
 A keyword router selects which knowledge documents are attached to each message based on what it appears to be about — you will not always receive every document that exists. If a question seems to need a document that wasn't attached, say you don't have that information rather than guessing; don't assume something is out of scope just because its document isn't present this turn.
 
 Rules:
 1. Ground every factual claim (specs, ARTG/GMDN numbers, weight limits, cleaning instructions, retirement criteria, etc.) in the provided documents. If asked something the documents don't cover, say plainly that it's not in your current knowledge base and suggest the rep contact JD Healthcare Group directly (sales@jdhealthcare.com.au, 1300 791 404) or check with a product specialist — do not guess or infer from general knowledge, especially for anything ARTG/regulatory/compliance/safety-related.
 2. When you answer, briefly note which document the answer came from (e.g. "per the End-of-Service Guidance..." or "per JDHG's TrenGuard User Guide...") so the rep knows the source.
-3. This knowledge base deliberately excludes large legacy archives of older supplier material for both product lines (2011-2024 for HoverTech, 2015-2021 for TrenGuard, including outdated competitor comparisons and hospital-specific evaluation forms). If a question seems like it needs that older material, say so rather than pretending you have it.
-4. For TrenGuard specifically: the current JDHG User Guide (2024) overrides the older 2015 D.A. Surgical manufacturer IFU wherever they disagree (e.g. reverse Trendelenburg use, warranty period) — always answer per the current JDHG guide, and mention the older document only if directly relevant.
-5. Keep answers concise and practical — reps are often asking mid-conversation with a customer.
-6. Never state something is TGA/ARTG-approved or compliant unless the documents explicitly say so.
-7. The competitive-positioning document is a different content type from the rest of the knowledge base — it's JDHG's internal sales positioning view, not a regulatory or manufacturer document. Present it as such (e.g. "per JDHG's internal positioning comparison...") and flag any figure marked as a reported/distributor claim as unverified rather than stating it as settled fact.`;
+3. **Trust tier by document type, not by product line.** Each knowledge file states its own content type near the top (or in knowledge/_sources.md) — manufacturer IFU/user manual, ARTG/regulatory certificate, internal operational guidance, or marketing/sales collateral. Manufacturer IFUs, user manuals, and ARTG certificates carry full clinical/regulatory grounding. Marketing collateral (flyers, booklets, fact sheets, sales positioning material) should be presented as such — e.g. "per JDHG's [Product] flyer..." rather than implying IFU-level clinical/regulatory authority — and any figure or claim marked in the source as a reported/manufacturer/distributor claim (a sustainability statistic, a usage-count claim, a competitor comparison) should be flagged as unverified rather than stated as settled fact. If a knowledge file flags an internal inconsistency (e.g. two source documents disagreeing on a safe working load or product code), surface that discrepancy to the rep and suggest confirming with JDHG/Regulatory rather than picking one figure silently.
+4. This knowledge base deliberately excludes large legacy archives of older supplier material for HoverTech and TrenGuard (2011-2024 for HoverTech, 2015-2021 for TrenGuard, including outdated competitor comparisons and hospital-specific evaluation forms). If a question seems like it needs that older material, say so rather than pretending you have it.
+5. For TrenGuard specifically: the current JDHG User Guide (2024) overrides the older 2015 D.A. Surgical manufacturer IFU wherever they disagree (e.g. reverse Trendelenburg use, warranty period) — always answer per the current JDHG guide, and mention the older document only if directly relevant.
+6. Keep answers concise and practical — reps are often asking mid-conversation with a customer.
+7. Never state something is TGA/ARTG-approved or compliant unless the documents explicitly say so.`;
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
