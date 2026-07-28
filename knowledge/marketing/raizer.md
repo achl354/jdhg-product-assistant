@@ -2,11 +2,15 @@
 
 **Content type: marketing/sales collateral (JDHG flyers, fact sheet), not a manufacturer IFU or ARTG/regulatory document**, except where a manufacturer user manual excerpt is quoted directly below. Manufacturer: Liftup. One file in this folder ("JD PROCare Raizer Service Flyer") returned no extractable text (likely an image-only/scanned PDF) and was not processed — flag to a rep asking about JD PROCare servicing specifics that this source wasn't machine-readable.
 
+This file merges 3 source PDFs: JDHG Flyer - Raizer II - JDHG200726.pdf, MH - JDHG Fact Sheet - Raizer II - JDHG200824.pdf, and JDHG Flyer - Raizer Head Rest - JDHG251125.pdf.
+
 ## What it is
+*Source: JDHG Flyer - Raizer II - JDHG200726.pdf*
 
 Raizer II is an assistive-technology mobile lifting chair that helps a person who has fallen on the floor to get up in a few minutes, operable by a single assistant with only limited physical effort (beyond a supportive hand). Raizer II is an updated version of the original Raizer with a new design and features. Patent number 2015383978.
 
 ## Key features
+*Source: JDHG Flyer - Raizer II - JDHG200726.pdf and MH - JDHG Fact Sheet - Raizer II - JDHG200824.pdf (consistent across both)*
 - **Safe Working Load: 150kg**
 - Lifting time: 20–30 seconds
 - Weight: seat 8.5kg, legs+backrests 4.5kg, total 13kg
@@ -22,6 +26,7 @@ Raizer II is an assistive-technology mobile lifting chair that helps a person wh
 - Transport: carried in two bags (backrests+legs in one bag with ergonomic straps; motor unit/seat in a separate protective cover), or via an optional Raizer II Trolley that holds both bags side by side
 
 ## Basic use procedure (from the fact sheet, mirrors manufacturer manual)
+*Source: MH - JDHG Fact Sheet - Raizer II - JDHG200824.pdf*
 1. Ask the fallen patient to bend their knees while supine, so the seat/battery unit can be placed under the bent legs (non-slip surface against the patient's upper legs)
 2. Both backrests are identical — insert into the seat on each side as the patient rolls their torso (arms crossed on chest)
 3. Click two identical legs into the receivers on each side
@@ -39,6 +44,8 @@ Raizer II is an assistive-technology mobile lifting chair that helps a person wh
 | MHLU-103314 | Triple Wheel for Trolley |
 
 ## Head Rest accessory
+*Source: JDHG Flyer - Raizer Head Rest - JDHG251125.pdf*
+
 Supports the head and neck of the person being lifted, useful where the helper needs both hands free. Compliant with DIN EN ISO 10993-10:2014-10 (biological evaluation — irritation/skin sensitisation) and DIN EN ISO 10993-5:2009-10 (in vitro cytotoxicity).
 
 ## Contact

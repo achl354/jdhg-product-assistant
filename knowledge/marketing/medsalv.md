@@ -1,6 +1,6 @@
 # Medsalv — Remanufactured Single-Use Device Program
 
-**Content type: marketing/sales collateral (JDHG flyers), not a manufacturer IFU or ARTG/regulatory document.**
+**Content type: marketing/sales collateral (JDHG flyers), not a manufacturer IFU or ARTG/regulatory document.** This file merges 3 source PDFs (How It Works — Easimove, How It Works — HoverMatt, Reprocessing, all JDHG050625) which describe the same program consistently; no conflicts identified between them.
 
 ## What it is
 

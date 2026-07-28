@@ -3,6 +3,7 @@
 **Content type: marketing/sales collateral (JDHG flyers), not a manufacturer IFU or ARTG/regulatory document.** Treat specs and sustainability claims below as JDHG marketing material rather than independently verified clinical or regulatory fact.
 
 ## NetZero Underpad
+*Source: A4 Flyer - NetZero Underpad - JDHG140525.pdf*
 
 Single-use underpad positioned as a sustainable alternative to traditional plastic-backed disposable underpads.
 
@@ -19,6 +20,7 @@ Single-use underpad positioned as a sustainable alternative to traditional plast
 | CCJD-NZCU-XL | 3850ml | X-Large: 90cm x 225cm | 20 pads (2 bags of 10) |
 
 ## NetZero Curtain
+*Source: A4 Flyer - NetZero Curtain - JDHG201125.pdf*
 
 Single-use privacy curtain made with **recycled content** and **fully recyclable**, positioned as a lower-carbon alternative to traditional virgin-polypropylene disposable curtains.
 

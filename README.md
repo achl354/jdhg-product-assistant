@@ -1,13 +1,80 @@
 # JDHG Product Assistant — pilot
 
-A small chat web app for JDHG reps to ask questions about JDHG's product range, grounded only in a curated set of vetted documents (see `knowledge/_sources.md`). HoverTech and TrenGuard have full manufacturer IFU/usage manuals and ARTG certificates loaded; the rest of the catalogue (NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, Easi Rider/Mover) currently has only marketing collateral (flyers/booklets/fact sheets) loaded — the bot is instructed to present that tier accordingly rather than imply IFU-grade certainty.
+A small chat web app for JDHG reps to ask questions about JDHG's product range, grounded only in a curated set of vetted documents (see `knowledge/_sources.md` and `knowledge/sources.meta.json`). HoverTech and TrenGuard have full manufacturer IFU/usage manuals and ARTG certificates loaded; the rest of the catalogue (NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, Easi Rider/Mover) currently has only marketing collateral (flyers/booklets/fact sheets) loaded — the bot is instructed to present that tier accordingly rather than imply IFU-grade certainty.
+
+This document covers the pilot-hardening pass: cross-platform routing, the answer contract, source metadata, claim-level provenance, request/access hardening, and testing. For the original build rationale see the "Why it's built this way" section below, unchanged from the initial pilot.
 
 ## Why it's built this way
 
 - **No live SharePoint search.** Live search would need an Azure AD app registration and admin consent to call Microsoft Graph — a real dependency this pilot deliberately avoids. Instead, the knowledge base is a one-time manual export of the current, vetted documents into `knowledge/*.md`.
 - **No Teams/Bot Framework integration.** This is a plain web page + API, so it can run and be tested immediately. It can be embedded as a Teams tab later, or wired into a real Bot Framework bot once there's Azure access — neither is required to use it today.
-- **Refuses rather than guesses.** The system prompt in `server.js` instructs the model to answer only from the provided documents and say so explicitly when something isn't covered, rather than fall back on general knowledge — important for ARTG/compliance-sensitive answers.
-- **Keyword-routed knowledge, not a flat dump.** Sending the entire knowledge base on every message gets expensive as more product lines are added. A keyword router (`KNOWLEDGE_INDEX` in `server.js`) picks only the files relevant to the question — plus the last couple of turns, so follow-ups still work — and falls back to the full set if nothing matches, rather than risk a wrong "not in my knowledge base." Adding a new knowledge file means adding a matching entry to `KNOWLEDGE_INDEX` too.
+- **Refuses rather than guesses.** The system prompt (`lib/prompt.js`) instructs the model to answer only from the provided documents and say so explicitly when something isn't covered, rather than fall back on general knowledge — important for ARTG/compliance-sensitive answers.
+- **Keyword-routed knowledge, not a flat dump.** Sending the entire knowledge base on every message gets expensive as more product lines are added. A keyword router (`KNOWLEDGE_INDEX` in `lib/knowledgeStore.js`) picks only the files relevant to the question — plus the last couple of turns, so follow-ups still work — and falls back to the full set if nothing matches, rather than risk a wrong "not in my knowledge base." Adding a new knowledge file means adding a matching entry to `KNOWLEDGE_INDEX` too.
+
+## Code layout
+
+Business logic lives in `lib/`, independent of Express and the live Anthropic API, so it can be unit-tested directly (see `test/`):
+
+- `lib/knowledgeStore.js` — loads `knowledge/**/*.md`, builds cross-platform knowledge IDs, keyword routing, startup validation that every indexed file exists.
+- `lib/requestValidation.js` — server-side validation of the `/api/chat` request body.
+- `lib/auth.js` — basic-auth gate and the production fail-fast startup check.
+- `lib/answerContract.js` — the `provide_answer` tool schema, the fallback answer shape, and defensive validation of the model's output.
+- `lib/prompt.js` — the system prompt / operating rules given to the model.
+- `server.js` — wires the above into an Express app; no business logic of its own.
+
+## Knowledge routing (cross-platform)
+
+Knowledge IDs (e.g. `marketing/hygenica.md`) are always built with a literal forward slash via template strings, never with `path.join`/`path.sep`. `path.join` is only used to build the actual filesystem path passed to `fs.readFileSync`. This means an ID is identical on Windows and Linux by construction — there's no OS-conditional code path to get wrong, so a single Linux test run is sufficient evidence for both platforms (see `test/knowledgeStore.test.js`, including a regression test that reproduces the old `path.join`-based bug via `path.win32.join` and confirms the fixed loader doesn't produce it).
+
+At startup, `findMissingKnowledgeFiles` checks every file referenced by `KNOWLEDGE_INDEX` (and `ALWAYS_INCLUDE`) actually exists in the loaded knowledge map. If anything is missing, the server logs a clear error naming the missing file(s) and exits (`process.exit(1)`) rather than starting in a broken state. A question that doesn't match any keyword still falls back to sending the full knowledge set, so an unmatched question never produces a false "not in my knowledge base."
+
+## The answer contract
+
+`/api/chat` always returns a structured JSON object, never free text, enforced by forcing the model to call the `provide_answer` tool (`lib/answerContract.js`) rather than relying on prompt instructions alone:
+
+| Field | Meaning |
+|---|---|
+| `answer` | Full internal answer, including caveats inline. |
+| `status` | One of `confirmed` / `supported` / `needs_confirmation` / `cannot_answer` (see below). |
+| `sources` | Knowledge document IDs the answer draws from. |
+| `internal_caveat` | Internal-only guidance for the rep, or `null`. Never phrased for a customer to hear. |
+| `customer_ready` | A customer-safe, quotable version of the answer with no internal hedging — empty string if nothing can be safely told to a customer yet. |
+| `related_documents` | Other document IDs that might be relevant follow-ups. |
+
+The response is validated twice: once by the Claude tool schema itself, and again server-side by `isWellFormedAnswer` before it's ever sent to the browser — if either the model doesn't call the tool or the output doesn't match the expected shape, the server returns `fallbackAnswer(...)` (always `status: "cannot_answer"`) instead of passing through anything unvalidated.
+
+In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer, a sources line, and — only when present — a blue "copy-ready customer wording" box and a separate amber "internal caveat" box, so a rep can visually tell at a glance what's safe to read/paste to a customer versus what's for their own decision-making only.
+
+### The four statuses
+
+- **confirmed** — grounded in a current, approved manufacturer IFU/user manual or ARTG/regulatory document, with no unresolved conflict between sources.
+- **supported** — grounded in approved marketing or internal operational material — real JDHG content, but not IFU/regulatory grade.
+- **needs_confirmation** — the evidence for this specific claim is incomplete, conflicting between sources (or internally ambiguous within one source), or unapproved. This is not "the model is slightly unsure" — it's used whenever a knowledge file itself flags a discrepancy, even if a single plausible-sounding answer could be constructed. The model is explicitly instructed never to silently pick one interpretation and present it as settled.
+- **cannot_answer** — the knowledge base doesn't cover this at all.
+
+Document type sets an upper bound on status: marketing collateral (flyers, booklets, fact sheets, sales positioning) can support `supported` at most, never `confirmed` — this is enforced both in the system prompt and, at the metadata layer, by a test asserting no `marketing_collateral` source is ever tagged `authority_level: confirmed`.
+
+## Source metadata (`knowledge/sources.meta.json`)
+
+Human-edited prose knowledge (`knowledge/**/*.md`) is kept separate from a generated, machine-readable metadata file, `knowledge/sources.meta.json`, with one entry per knowledge file covering: source document name, document type, revision/version, document date, page/section, authority level, approval status, approver/owner, last-reviewed date, external-use permission, current/superseded status, known location, secure document link, and a `known_conflicts` array. The file's own `$schema_notes.field_glossary` documents what each field means.
+
+**Nothing is invented.** No formal JDHG document-approval workflow, named approver, external-use clearance, or stable document-control link was available for any source at ingestion time — so `approval_status`, `approver_owner`, `external_use_permission`, and `secure_document_link` are `"needs_confirmation"` for every single entry, including the pre-existing HoverTech/TrenGuard sources. A test (`test/sourceProvenance.test.js`) enforces this stays true rather than silently regressing to a guessed value later.
+
+## Claim-level provenance
+
+Where a single knowledge file merges multiple source PDFs, per-section `*Source: ...*` tags attribute each fact to the specific document it came from (e.g. `knowledge/marketing/hygenica.md`, `imove.md`, `raizer.md`, `clavia.md`, `trulife-pressurecare.md`, `netzero.md`, `medsalv.md`). Where two sources for the same product disagreed rather than merely covering different sections, the file was split instead (AlbacMat's flyer and 2019 manual are now two separate files, each flagging the other's conflicting safe-working-load figure) or a dedicated "NEEDS CONFIRMATION" section was added inline (Carexia's Trendelenburg-vs-fully-reclined ambiguity).
+
+### The Carexia weight-limit conflict
+
+The source flyer (`JDHG Flyer - Carexia FPVE - JDHG121124.pdf`) states "135kg in Trendelenburg position" in its feature bullets and, separately, "Safe working load (fully reclined): 135kg" in its specification table. Trendelenburg tilt (the whole chair angled head-down) and the backrest being fully reclined (its own separate recline-angle spec) are not necessarily the same physical state, and the source document never disambiguates which one — or both — the 135kg figure applies to. No other source document was available to resolve it. Per the requirement not to choose an interpretation ourselves: `knowledge/marketing/carexia.md` and `knowledge/sources.meta.json` both mark this `needs_confirmation`, and the bot is instructed (`lib/prompt.js`, rule 4) to tell the rep to confirm the exact condition with JDHG/Regulatory before quoting either interpretation to a customer — never to pick the plausible-sounding one itself. This is covered by an explicit test in `test/sourceProvenance.test.js`.
+
+## Access control and request hardening
+
+- **Production fails closed.** At startup, `assertAuthConfigured` (`lib/auth.js`) checks `BASIC_AUTH_USER`/`BASIC_AUTH_PASS`. If `NODE_ENV=production` and both aren't set, the server logs a clear error and exits — it will not silently start wide open. The only way to run production without credentials is the explicit `ALLOW_UNAUTHENTICATED=true` escape hatch, meant as a deliberate, temporary choice, never a default.
+- Outside production (local development), running without credentials is allowed with a logged warning, so `npm start` still works out of the box for local testing.
+- **Request validation** (`lib/requestValidation.js`, enforced before anything else in `/api/chat`): `message` must be a non-empty string up to 4000 characters; `history` (if present) must be an array of up to 40 entries, each `{ role: "user"|"assistant", content: string }` with content up to 4000 characters and no extra fields. Anything malformed returns HTTP 400 with a short, generic description — never echoing request content back or leaking internals.
+- **Request body size** is capped (`express.json({ limit: "256kb" })`) independently of the message-length check, so an oversized raw body is rejected before JSON parsing.
+- **No secrets or stack traces reach the browser.** The catch-all Express error handler logs `err.message` server-side only and always responds with a generic `{ error: "Invalid request." }`; the chat handler's own catch block does the same, returning `fallbackAnswer(...)` rather than the underlying Anthropic API error.
 
 ## Run it locally
 
@@ -17,7 +84,15 @@ export ANTHROPIC_API_KEY=sk-ant-...
 npm start
 ```
 
-Then open http://localhost:3000. Without `BASIC_AUTH_USER`/`BASIC_AUTH_PASS` set, it runs open — fine for local testing, not for anything deployed.
+Then open http://localhost:3000. Without `BASIC_AUTH_USER`/`BASIC_AUTH_PASS` set, it runs open — fine for local testing, not for anything deployed. Set `NODE_ENV=production` to exercise the production fail-fast path.
+
+## Testing
+
+```bash
+npm test
+```
+
+Runs Node's built-in test runner (`node --test`, no extra dependency) over everything in `test/`. Covers: every `KNOWLEDGE_INDEX`/`ALWAYS_INCLUDE` file actually exists on disk; the Windows/Linux knowledge-ID regression (including a direct reproduction of the old `path.join`-based bug via `path.win32.join`, proving the fixed loader no longer produces backslash-separated IDs); "Hygenica" routing to `marketing/hygenica.md`; at least one routing test question per `KNOWLEDGE_INDEX` entry; follow-up questions retaining product context via recent history; an unmatched question falling back to the full knowledge set; the full request-validation matrix (message/history length, malformed roles, non-string content, extra fields); the auth startup gate (configured / dev-mode / production-without-override / explicit override) and the basic-auth middleware itself; the `provide_answer` contract (schema requiredness, status enum, `isWellFormedAnswer` rejecting every malformed shape); and the source-provenance rules (metadata schema completeness, no invented approval/owner/permission/link fields, marketing collateral never marked `confirmed`, the Carexia and AlbacMat conflicts staying flagged, and the system prompt's anti-silent-resolution instructions).
 
 ## Deploying to Render
 
@@ -43,3 +118,29 @@ Edit or add files under `knowledge/`. Each file should be a self-contained markd
 - For TrenGuard, JDHG's 2024 User Guide is treated as authoritative over the manufacturer's original 2015 IFU where they conflict — see the note in `knowledge/trenguard-usage-and-ifu.md`.
 - Basic auth (single shared username/password) only — fine for a small pilot, not real per-user access control or audit logging. Revisit if this becomes permanent.
 - No conversation persistence — history only lives in the browser tab.
+
+## Unresolved knowledge gaps and sources requiring human approval
+
+This is the explicit deliverable for pilot sign-off — everything here needs a human decision before the bot's coverage can be considered fully settled. Full detail for each item lives in `knowledge/sources.meta.json` (`known_conflicts` per source).
+
+### Approval / governance gap affecting every single source (24/24)
+
+No formal JDHG document-approval workflow, named approver/owner, external-use (customer-facing) clearance, or stable document-control link exists in the systems this pilot had access to, for **any** source — including the pre-existing HoverTech and TrenGuard IFUs/ARTG certificates. Concretely, `approval_status`, `approver_owner`, `external_use_permission`, and `secure_document_link` are `needs_confirmation` for every entry in `knowledge/sources.meta.json`. Before this pilot is used to produce customer-facing wording at scale, JDHG/Regulatory should confirm, per source (or per document type as a shortcut): who is the approving owner, whether it's cleared for external/customer use, and where its authoritative, stable copy lives.
+
+### Specific factual conflicts requiring a human decision
+
+1. **Carexia FPVE weight limit (`marketing/carexia.md`)** — the source flyer states "135kg in Trendelenburg position" and, separately, "safe working load (fully reclined): 135kg," without clarifying whether these describe the same condition, two different conditions, or both simultaneously. **Needs confirmation with JDHG/Regulatory** — the bot will not quote either interpretation as settled until this is resolved.
+2. **AlbacMat safe working load (`marketing/albacmat-flyer.md` vs `marketing/albacmat-manual-2019.md`)** — the current JDHG flyer states 470kg SWL; the 2019 manufacturer manual states 500kg SWL with a 160kg *tested* safe load. Which figure is current/authoritative is unresolved, and the manual's 2019 date is itself unconfirmed as the latest manufacturer edition. **Needs confirmation with JDHG/the manufacturer.**
+3. **I-MOVE EZ-GO Bariatric product code (`marketing/imove.md`)** — appears as both `CFBM-EZTRSOv2` and `CFBM-EZTSROv2` across two source flyers. Likely a typo in one, but which one is unconfirmed. **Needs confirmation with JDHG before quoting a code to a customer.**
+4. **TrenGuard 600 Hybrid procedure pack ARTG number (`trenguard-artg-and-regulatory.md`)** — only the 450 Hybrid pack's ARTG number (290464) was found in the documents reviewed; the 600 Hybrid pack's own number could not be confirmed. **Needs confirmation with Regulatory.**
+5. **Medsalv remanufactured-device ARTG number (`marketing/medsalv.md`)** — the source flyers state remanufactured devices carry their own ARTG listing but don't give the number. **Needs confirmation with Medsalv/Regulatory.**
+6. **Carexia source PDF date conflict (`marketing/carexia.md`)** — the same source PDF carries two different date codes (JDHG121124 on the main flyer, JDHG140524 on the specifications page), unreconciled. Low materiality (doesn't affect product facts) but flagged for completeness.
+
+### Content gaps (not conflicts, but incomplete ingestion)
+
+7. **Hygenica "Info Pack" PDF (`marketing/hygenica.md`)** — exceeded this ingestion pass's size/token limit and was not fully processed. The booklet content captured is extensive but not confirmed exhaustive for this specific document.
+8. **Raizer JD PROCare Service Flyer (`marketing/raizer.md`)** — returned no extractable text (likely a scanned/image-only PDF) and was not ingested at all. A rep asking about JD PROCare servicing specifics should be told this isn't covered yet.
+
+### Statistics/claims sourced from marketing material, not independently verified by JDHG
+
+These are already labelled in-file as reported/marketing claims (not settled fact) and don't block pilot use, but are listed here for completeness since they came from vendor/distributor material rather than JDHG's own verification: NetZero's landfill-volume and emissions-reduction figures; Medsalv's "92% waste reduction"/"75% blended content" figures and B-Corp/Climate-Positive claims; the competitive-positioning "~750,000 procedures globally" figure; and Trulife's cited pressure-injury prevalence statistics (2006–2009 studies — old, not current Australian data).

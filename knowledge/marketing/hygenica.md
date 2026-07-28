@@ -2,11 +2,15 @@
 
 **Content type: marketing/sales collateral (JDHG flyers, info pack, order forms), not a manufacturer IFU or ARTG/regulatory document.** Efficacy figures below are Hygenica/manufacturer-reported test results, not independently verified by JDHG — cite them as "per Hygenica's published testing," not as an unqualified fact. One large combined info-pack file for this brand exceeded this ingestion pass's size limit and was not fully processed; if a rep asks something not covered here, say so rather than guessing, since the info pack may contain additional detail.
 
+This file merges content from 6 source PDFs — each section below is tagged with which one(s) it came from.
+
 ## What it is
+*Source: IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf*
 
 Hygenica Disposable IPC (infection prevention and control) Curtains and disposable Privacy Blinds, positioned against Hospital Acquired Infections (HAIs). Manufactured from non-woven polypropylene treated with **Fantex®**, Hygenica's proprietary broad-spectrum antimicrobial.
 
 ## Fantex® antimicrobial — claimed efficacy
+*Source: IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf*
 
 - Kills 99.9% (log 3) of pathogens within **1 minute** of contact time (per BS EN ISO 20743 / BS EN 1276 / BS EN 1650 testing cited by Hygenica)
 - Antimicrobial activity claimed against: E. coli, Staphylococcus aureus, MRSA, VRE, CRE, CPE, Klebsiella pneumoniae, Clostridium difficile, Candida albicans/auris, Aspergillus niger, Pseudomonas aeruginosa, and a range of viruses (feline coronavirus/MERS surrogate, influenza, rotavirus, norovirus surrogate, foot & mouth, avian influenza, etc.)
@@ -15,6 +19,7 @@ Hygenica Disposable IPC (infection prevention and control) Curtains and disposab
 - In a Hygenica-commissioned comparison against a named "Competitor M" silver-containing curtain, Hygenica's fabric showed >3.0 log kill at 1 minute vs. -0.1 (no meaningful kill) for the competitor — this is Hygenica's own comparative test data, not independently audited
 
 ## Curtains
+*Source: IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf and JDHG Flyer - Hygenica Curtains - JDHG300326.pdf*
 
 - Hygienic, non-woven polypropylene fabric — no laundering cost, single-use disposable, must NOT be laundered or re-used
 - 100% recyclable (fabric, hooks, tie-backs, labels all polypropylene); Australia/UK collect for recycling as non-clinical waste if not biologically soiled
@@ -28,6 +33,7 @@ Hygenica Disposable IPC (infection prevention and control) Curtains and disposab
 Pattern: `ICHY-<hook type>-<size>-<colour>` for the standard 2.0m-drop range (e.g. `ICHY-EFLG-WH` = EasyFit Large White; `ICHY-UFST-GY` = UniFit Standard Grey), and `ICHY-AM-<hook type>-<colour>` for the 2.5m-drop mesh/antimicrobial range. Full colour/size code tables are in the source flyers if a rep needs an exact order code.
 
 ## Disposable Hospital Blinds
+*Source: IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf, JDHG Flyer - Disposable Hospital Blinds - JDHG300326.pdf, JDHG Flyer - Roller Blind Ordering Details - JDHG300326.pdf, and Roller Blinds Order Form - JDHG300326.pdf*
 
 - Fantex®-treated, same antimicrobial claims as the curtains
 - Cartridge replacement system — blinds can be taken down and replaced in seconds, no cleaning downtime required

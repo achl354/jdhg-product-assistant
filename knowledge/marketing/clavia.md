@@ -1,8 +1,10 @@
 # Clavia — Chemo/Dialysis Chairs & Surgery Stretcher
 
-**Content type: marketing/sales collateral (JDHG flyers), not a manufacturer IFU or ARTG/regulatory document.**
+**Content type: marketing/sales collateral (JDHG flyers), not a manufacturer IFU or ARTG/regulatory document.** This file merges 3 source PDFs, one per product below.
 
 ## Clavia FCD — Chemo & Dialysis Trolley Chair
+*Source: CF - JDHG Flyer - Clavia FCD - JDHG120924.pdf*
+
 Electric trolley chair for chemotherapy/dialysis, six pre-programmed positions (Welcome, Relax, Reverse Trendelenburg, Secured Trendelenburg, CPR, plus a sixth profile).
 
 - Three-section mattress support platform (choice of two widths); 10cm dual-layer hospital-grade foam mattress with viscoelastic top layer; removable waterproof slate-grey PVC-coated jersey cover (wipe down or launder)
@@ -24,6 +26,8 @@ Electric trolley chair for chemotherapy/dialysis, six pre-programmed positions (
 | Twin castor Ø | 125mm |
 
 ## Clavia LSA Surgery — General Purpose Day Surgery Stretcher
+*Source: CF - JDHG Flyer - Clavia LSA Surgery - JDHG101024.pdf*
+
 Same base platform as the FCD (electric backrest/Trendelenburg/reverse Trendelenburg/leg rest/height), designed so the patient is never transferred — the procedure is performed directly on the chair. **Safe Working Load: 200kg.**
 
 Additional surgery-specific features: detachable tapered head section integrated into backrest, accepting three specialised surgical head-rest options (Ophthalmology — concave cushion, CFBM-LCA-OPH; Stomatology — flat cushion, CFBM-LCA-PLA; Stomatology/ENT — non-articulated concave cushion, CFBM-LCA-STO); surgical accessory rails on both sides of backrest frame; foot pedal height control; solid side rails that drop down and slide sideways for improved surgical access; corner bumpers with accessory receptacles (foot end); folding push handles (head and foot end); central-locking swivel twin castors plus retractable 5th wheel.
@@ -39,6 +43,8 @@ Additional surgery-specific features: detachable tapered head section integrated
 | Twin castor Ø | 150mm |
 
 ## Clavia AMB7 FCD — Chemotherapy Bed/Chair (newer model)
+*Source: JDHG Flyer - Clavia AMB7 FCD - JDHG121225.pdf*
+
 Ambulatory care chair for dialysis/chemotherapy with 4 pre-programmed positions: Patient Welcome, Nursing, Ultra-Comfort (Zero Gravity), Emergency Trendelenburg.
 
 - Electrically adjustable height, backrest, legrest, Trendelenburg (10°) and reverse Trendelenburg (15°)

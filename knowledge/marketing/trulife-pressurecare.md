@@ -2,6 +2,8 @@
 
 **Content type: marketing/sales collateral (JDHG booklets, posters, flyers), not a manufacturer IFU or ARTG/regulatory document.** Test results cited below (disinfectant, flammability, autoclave, temperature) are as reported by Trulife/JDHG marketing material; treat as manufacturer-reported rather than independently verified by JDHG unless a rep needs a formal test certificate, in which case refer them to JDHG/Regulatory.
 
+**Provenance:** this file merges 12 source PDFs. Unless a section below says otherwise, the "Company background," "Why pressurecare matters," "Product range/material tiers," and the per-category product-code tables ("Product categories & codes") are from *JDHG Booklet - Trulife Pressurecare Range - JDHG200525.pdf*, and are consistent with (not contradicted by) the 6 narrower by-body-area flyers (*TS - JDHG Flyer - Trulife \<Ankle Heel & Foot / Arm & Elbow / Body Protection / Head & Neck / Leg & Knee / Table Pad\> Range - JDHG110722.pdf*), which restate subsets of the same catalogue. The ARDS system and the by-position tables have their own distinct sources, tagged where they appear below.
+
 ## Company background
 Trulife is an international group manufacturing niche healthcare products (pressurecare, orthopaedics, prosthetics, breastcare, wheelchair cushions). Began pressure-relieving OR products in 1995; JD Healthcare Group is the Australian distributor.
 
@@ -97,9 +99,13 @@ General material properties claimed across the range: redistributes weight, perf
 | TSTL-OA200 | Oasis Heel & Ankle Protector (Velcro, boot-style) (pair) | 250x120x10mm |
 
 ## ARDS Prone Pad System (TSTL-ELP200) — Elite Foam Positioners
+*Source: TS - JDHG Booklet - Trulife ARDS Prone System - JDHG310724.pdf*
+
 For Acute Respiratory Distress Syndrome (ARDS) prone positioning, encouraging respiratory function while accommodating anatomical conformity. Components: Prone Headrest Pad (TSTL-ELP141, 265x245x170mm), Chest Positioning Pad (TSTL-ELP215, 500x300x171mm), Stomach Positioning Pad (TSTL-ELP216, 500x300x161mm), Hip Positioner Pad (TSTL-ELP217, 500x300x81mm), Shin Positioning Pad (TSTL-ELP218, 500x310x150mm). Also in the Elite Foam Positioners line: Universal Positioner (TSTL-ELP011, 330x230x50mm), Roll Positioner (TSTL-ELP214, 500x120mm), Prone Pad Positioner (TSTL-ELP914, 1014x480x140mm), Headrest Positioner (TSTL-TR012, 260x200x154mm). Elite Foam Positioners are high-quality, reusable, multi-purpose, slow-recovery immersive foam, lightweight.
 
 ## Recommended products by surgical position
+*Source: TS - A3 Poster - Trulife \<Lateral / Lithotomy / Paediatric Products / Prone\> Positioning - JDHG130722.pdf (4 posters), consistent with the range booklet's own by-position tables*
+
 The source booklet includes quick-reference tables mapping each body area (head & neck, arm & elbow, body, leg & knee, ankle/heel/foot) to recommended product codes for **Supine, Prone, Lateral, Lithotomy, and Paediatric** positioning — these are essentially the same product catalogue above, filtered by which items suit each position. If a rep asks "what do I need for a [lateral/prone/lithotomy/paediatric] case," cross-reference the category tables above; do not assume a product is unsuitable for a position not explicitly listed without checking, since the by-position tables are a curated subset, not an exhaustive suitability statement.
 
 ## Testing (manufacturer/JDHG-reported)
