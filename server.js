@@ -34,14 +34,17 @@ import {
 } from "./lib/knowledgeStore.js";
 import { assertAuthConfigured, createBasicAuthMiddleware } from "./lib/auth.js";
 import { validateChatRequest, MAX_REQUEST_BODY_SIZE } from "./lib/requestValidation.js";
-import { ANSWER_TOOL, ANSWER_TOOL_NAME, fallbackAnswer, isWellFormedAnswer } from "./lib/answerContract.js";
+import { ANSWER_TOOL, ANSWER_TOOL_NAME, fallbackAnswer } from "./lib/answerContract.js";
 import { STATIC_INSTRUCTIONS } from "./lib/prompt.js";
 import { appendGap, readGaps, renderGapsPage } from "./lib/gapLog.js";
+import { runChatStream } from "./lib/chatStream.js";
+import { validateFeedbackRequest, appendFeedback, readFeedback, renderFeedbackPage } from "./lib/feedbackLog.js";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
 const PORT = process.env.PORT || 3000;
 const KNOWLEDGE_DIR = path.join(process.cwd(), "knowledge");
 const GAPS_LOG_PATH = path.join(process.cwd(), "data", "knowledge-gaps.jsonl");
+const FEEDBACK_LOG_PATH = path.join(process.cwd(), "data", "feedback.jsonl");
 const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER;
 const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -103,53 +106,58 @@ app.post("/api/chat", async (req, res) => {
 
   console.log(`[chat] routed to: ${selectedFiles.join(", ")}`);
 
-  try {
-    const response = await client.messages.create({
-      model: MODEL,
-      max_tokens: 2048,
-      system: [
-        {
-          type: "text",
-          text: STATIC_INSTRUCTIONS,
-          cache_control: { type: "ephemeral" }
-        },
-        {
-          type: "text",
-          text: `<knowledge_base>\n${knowledgeBlock}\n</knowledge_base>`,
-          cache_control: { type: "ephemeral" }
-        }
-      ],
-      messages: [...history, { role: "user", content: message }],
-      tools: [ANSWER_TOOL],
-      tool_choice: { type: "tool", name: ANSWER_TOOL_NAME }
-    });
+  // Streamed as newline-delimited JSON frames rather than one JSON response,
+  // so the browser can reveal the answer as it's generated instead of
+  // waiting for the whole structured object. Once the first res.write()
+  // happens the HTTP status is locked in at 200 — so every failure from
+  // this point on (a malformed tool call, a dropped connection mid-stream)
+  // is reported as a {"type":"final"} frame carrying fallbackAnswer(...)
+  // rather than a different status code. The client only ever needs to
+  // handle two frame types: "answer_delta" (text so far) and "final" (the
+  // complete, validated answer contract — including the fallback shape).
+  res.setHeader("Content-Type", "application/x-ndjson");
+  res.setHeader("Cache-Control", "no-cache");
 
-    const toolUse = response.content.find((b) => b.type === "tool_use" && b.name === ANSWER_TOOL_NAME);
-    if (!toolUse || !isWellFormedAnswer(toolUse.input)) {
-      console.error("Model response did not contain a well-formed provide_answer call.");
-      return res.status(502).json(fallbackAnswer("the assistant's response could not be parsed"));
-    }
+  const writeFrame = (frame) => res.write(JSON.stringify(frame) + "\n");
 
-    // Only a real, well-formed "cannot_answer" counts as a knowledge gap —
-    // never the technical-failure fallbackAnswer() paths above/below, which
-    // are server problems, not missing content.
-    if (toolUse.input.status === "cannot_answer") {
-      try {
-        appendGap(GAPS_LOG_PATH, {
-          timestamp: new Date().toISOString(),
-          question: message,
-          answer: toolUse.input.answer
-        });
-      } catch (err) {
-        console.error("Failed to log knowledge gap:", err.message);
+  const stream = client.messages.stream({
+    model: MODEL,
+    max_tokens: 2048,
+    system: [
+      {
+        type: "text",
+        text: STATIC_INSTRUCTIONS,
+        cache_control: { type: "ephemeral" }
+      },
+      {
+        type: "text",
+        text: `<knowledge_base>\n${knowledgeBlock}\n</knowledge_base>`,
+        cache_control: { type: "ephemeral" }
       }
-    }
+    ],
+    messages: [...history, { role: "user", content: message }],
+    tools: [ANSWER_TOOL],
+    tool_choice: { type: "tool", name: ANSWER_TOOL_NAME }
+  });
 
-    res.json(toolUse.input);
-  } catch (err) {
-    console.error("Chat request failed:", err.message);
-    res.status(502).json(fallbackAnswer("failed to reach the assistant"));
+  const { data, isGenuineCannotAnswer } = await runChatStream(stream, writeFrame);
+
+  // Only a real, well-formed "cannot_answer" counts as a knowledge gap —
+  // never a technical-failure fallbackAnswer(), which is a server problem,
+  // not missing content.
+  if (isGenuineCannotAnswer) {
+    try {
+      appendGap(GAPS_LOG_PATH, {
+        timestamp: new Date().toISOString(),
+        question: message,
+        answer: data.answer
+      });
+    } catch (err) {
+      console.error("Failed to log knowledge gap:", err.message);
+    }
   }
+
+  res.end();
 });
 
 // Basic-auth-protected (same middleware as everything else, applied above)
@@ -158,6 +166,28 @@ app.get("/admin/gaps", (req, res) => {
   const gaps = readGaps(GAPS_LOG_PATH);
   res.set("Content-Type", "text/html");
   res.send(renderGapsPage(gaps));
+});
+
+app.post("/api/feedback", (req, res) => {
+  const validationError = validateFeedbackRequest(req.body);
+  if (validationError) {
+    return res.status(400).json({ error: validationError });
+  }
+  const { question, answer, rating } = req.body;
+  try {
+    appendFeedback(FEEDBACK_LOG_PATH, { timestamp: new Date().toISOString(), question, answer, rating });
+  } catch (err) {
+    console.error("Failed to log feedback:", err.message);
+    return res.status(500).json({ error: "Could not record feedback." });
+  }
+  res.json({ ok: true });
+});
+
+// Basic-auth-protected review page for rep thumbs up/down feedback.
+app.get("/admin/feedback", (req, res) => {
+  const entries = readFeedback(FEEDBACK_LOG_PATH);
+  res.set("Content-Type", "text/html");
+  res.send(renderFeedbackPage(entries));
 });
 
 // Catch-all error handler: express routes body-parser failures (bad JSON,

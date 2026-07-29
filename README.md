@@ -21,6 +21,9 @@ Business logic lives in `lib/`, independent of Express and the live Anthropic AP
 - `lib/answerContract.js` — the `provide_answer` tool schema, the fallback answer shape, and defensive validation of the model's output.
 - `lib/prompt.js` — the system prompt / operating rules given to the model.
 - `lib/gapLog.js` — append-only log of questions with no knowledge-base coverage, plus the `/admin/gaps` review page (see below).
+- `lib/feedbackLog.js` — append-only log of per-answer thumbs up/down feedback, plus the `/admin/feedback` review page.
+- `lib/chatStream.js` — orchestrates one streamed chat turn against an Anthropic `MessageStream`-shaped object, decoupled from Express/the live SDK so it's unit-testable with a fake stream.
+- `lib/streamingAnswer.js` — incrementally extracts the growing `answer` string out of the model's still-in-progress tool-call JSON, so the UI can reveal it as it's generated.
 - `server.js` — wires the above into an Express app; no business logic of its own.
 
 ## Knowledge routing (cross-platform)
@@ -46,13 +49,27 @@ The response is validated twice: once by the Claude tool schema itself, and agai
 
 In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer (with real markdown rendering — headings/bold/lists, not raw `#`/`**` symbols), a sources line, and — only when present — a blue "copy-ready customer wording" box (with a one-click Copy button) and a separate amber "internal caveat" box, so a rep can visually tell at a glance what's safe to read/paste to a customer versus what's for their own decision-making only. The interface is a single, focused chat column — no sidebar/quick-links — kept deliberately simple after early pilot feedback that a topic-picker sidebar wasn't adding value.
 
-## Flagged knowledge gaps (`/admin/gaps`)
+## Streaming responses
+
+`/api/chat` streams the answer as the model generates it, rather than making the rep wait for the entire structured response (status, sources, customer-ready wording, etc.) before seeing anything. The response body is newline-delimited JSON (`Content-Type: application/x-ndjson`) — a sequence of `{"type":"answer_delta","text":"..."}` frames carrying the growing answer text, followed by exactly one `{"type":"final","data":{...}}` frame carrying the complete, validated answer contract (or `fallbackAnswer(...)` on any failure — the client only ever needs to understand these two frame types).
+
+This is real token-level streaming, not a simulated typewriter effect — but it took an extra step to get right. The Anthropic SDK's own convenience event for streaming tool-call input (`stream.on("inputJson", (partialJson, jsonSnapshot) => ...)`) turned out to be unsuitable for revealing the `answer` field character-by-character: its vendored partial-JSON parser discards a string value entirely until its closing quote has arrived, so `jsonSnapshot.answer` jumps straight from `undefined` to the complete string in one shot rather than growing incrementally. `lib/streamingAnswer.js` instead accumulates the event's raw incremental JSON text itself and extracts the `answer` field's decoded content so far — including while its closing quote hasn't arrived yet — which is what actually produces the progressive reveal. `lib/chatStream.js` orchestrates this against a stream-shaped object (`on`/`finalMessage`), which is unit-tested with a fake stream (`test/chatStream.test.js`, `test/streamingAnswer.test.js`) rather than requiring a real API key.
+
+Once the first `res.write()` happens the HTTP status is locked at 200, so any failure from that point on (a malformed tool call, a dropped connection mid-stream) is reported as a `"final"` frame carrying `fallbackAnswer(...)`, not a different status code.
+
+## Feedback and knowledge-gap logging (`/admin/gaps`, `/admin/feedback`)
+
+### Flagged knowledge gaps (`/admin/gaps`)
 
 Whenever the model returns a real, well-formed `status: "cannot_answer"` (the knowledge base genuinely has nothing on the topic — not a technical failure like a missing API key, and not `needs_confirmation`, which already has material, just conflicting/incomplete), the server appends an entry — timestamp, the question, and the answer given — to `data/knowledge-gaps.jsonl`. Visit `/admin/gaps` (behind the same basic-auth login reps use) to review flagged questions and decide what new knowledge content to add.
 
 This is a log-and-review mechanism, not a live notification — nothing is emailed or pushed anywhere automatically. Two things worth knowing:
 - **Ephemeral disk**: on a host like Render, `data/knowledge-gaps.jsonl` is wiped whenever a new deploy creates a fresh filesystem (not on sleep/wake, only on redeploys). Fine for a pilot; if gap history needs to survive redeploys long-term, move it to a small database or external store later.
 - **No email/Slack alerting yet** — deliberately deferred until there's a mail-sending account (SMTP credentials or a transactional email provider) to wire up; the log-and-review page needs no such setup and works immediately.
+
+### Rep feedback (`/admin/feedback`)
+
+Every bot reply (including fallback/error answers) shows a 👍/👎 row. Clicking one POSTs `{question, answer, rating}` to `/api/feedback` (validated by `lib/feedbackLog.js`'s `validateFeedbackRequest`, same length-limited pattern as chat request validation) and appends it to `data/feedback.jsonl`. `/admin/feedback` (same basic-auth login) lists entries newest-first with a helpful/not-helpful count, so a 👎 on an answer the bot was actually confident about (as opposed to a `cannot_answer` the gap log already catches) still surfaces for review. The same ephemeral-disk caveat as the gap log applies.
 
 ### The four statuses
 
@@ -76,6 +93,16 @@ Where a single knowledge file merges multiple source PDFs, per-section `*Source:
 ### The Carexia weight-limit conflict
 
 The source flyer (`JDHG Flyer - Carexia FPVE - JDHG121124.pdf`) states "135kg in Trendelenburg position" in its feature bullets and, separately, "Safe working load (fully reclined): 135kg" in its specification table. Trendelenburg tilt (the whole chair angled head-down) and the backrest being fully reclined (its own separate recline-angle spec) are not necessarily the same physical state, and the source document never disambiguates which one — or both — the 135kg figure applies to. No other source document was available to resolve it. Per the requirement not to choose an interpretation ourselves: `knowledge/marketing/carexia.md` and `knowledge/sources.meta.json` both mark this `needs_confirmation`, and the bot is instructed (`lib/prompt.js`, rule 4) to tell the rep to confirm the exact condition with JDHG/Regulatory before quoting either interpretation to a customer — never to pick the plausible-sounding one itself. This is covered by an explicit test in `test/sourceProvenance.test.js`.
+
+## Interface polish
+
+- **Auto-resizing input.** The message box is a `<textarea>` that grows with content (capped at ~140px, then scrolls). Enter sends; Shift+Enter inserts a newline.
+- **Smart auto-scroll.** New messages only snap the log to the bottom if the rep was already scrolled near the bottom — if they've scrolled up to reread something, an incoming reply doesn't yank them back down. Sending a message always scrolls (expected — it's their own outgoing message).
+- **Conversation persistence.** The full conversation (both the Anthropic-format `history` used for API context and a `displayLog` capturing exactly what was rendered, including status/sources/customer-ready/caveat content) is saved to `localStorage` after every turn and replayed on page load, so a refresh doesn't lose the conversation. Falls back to a fresh greeting if nothing is saved or the saved shape doesn't parse.
+- **Dark mode.** Follows the OS/browser's `prefers-color-scheme` automatically — no manual toggle, no separate theme to maintain per component (colors are CSS custom properties, overridden as a block in a `@media (prefers-color-scheme: dark)` rule).
+- **Favicon.** An inline SVG data URI matching the existing navy "JD" brand mark already used in the header avatar — no external asset/network request.
+- **Accessibility.** `role="log"` on the message list; a visually-hidden `aria-live="polite"` region announces "Assistant replied" once a reply completes (deliberately not wired to every streaming delta, which would spam screen readers mid-stream); visible `:focus-visible` outlines on all interactive elements; `aria-label`s on the thumbs up/down buttons.
+- **Micro-interactions.** Buttons get a subtle press (`scale(0.96)`) and hover-background transition rather than an instant, static state change.
 
 ## Access control and request hardening
 
@@ -101,7 +128,9 @@ Then open http://localhost:3000. Without `BASIC_AUTH_USER`/`BASIC_AUTH_PASS` set
 npm test
 ```
 
-Runs Node's built-in test runner (`node --test`, no extra dependency) over everything in `test/`. Covers: every `KNOWLEDGE_INDEX`/`ALWAYS_INCLUDE` file actually exists on disk; the Windows/Linux knowledge-ID regression (including a direct reproduction of the old `path.join`-based bug via `path.win32.join`, proving the fixed loader no longer produces backslash-separated IDs); "Hygenica" routing to `marketing/hygenica.md`; at least one routing test question per `KNOWLEDGE_INDEX` entry; follow-up questions retaining product context via recent history; an unmatched question falling back to the full knowledge set; the full request-validation matrix (message/history length, malformed roles, non-string content, extra fields); the auth startup gate (configured / dev-mode / production-without-override / explicit override) and the basic-auth middleware itself; the `provide_answer` contract (schema requiredness, status enum, `isWellFormedAnswer` rejecting every malformed shape); the source-provenance rules (metadata schema completeness, no invented approval/owner/permission/link fields, marketing collateral never marked `confirmed`, the Carexia and AlbacMat conflicts staying flagged, and the system prompt's anti-silent-resolution instructions); and the knowledge-gap log (`appendGap`/`readGaps` round-tripping entries correctly, newest-first ordering, and `renderGapsPage` escaping HTML so a malicious question can't inject markup into the admin page).
+Runs Node's built-in test runner (`node --test`, no extra dependency) over everything in `test/`. Covers: every `KNOWLEDGE_INDEX`/`ALWAYS_INCLUDE` file actually exists on disk; the Windows/Linux knowledge-ID regression (including a direct reproduction of the old `path.join`-based bug via `path.win32.join`, proving the fixed loader no longer produces backslash-separated IDs); "Hygenica" routing to `marketing/hygenica.md`; at least one routing test question per `KNOWLEDGE_INDEX` entry; follow-up questions retaining product context via recent history; an unmatched question falling back to the full knowledge set; the full request-validation matrix (message/history length, malformed roles, non-string content, extra fields); the auth startup gate (configured / dev-mode / production-without-override / explicit override) and the basic-auth middleware itself; the `provide_answer` contract (schema requiredness, status enum, `isWellFormedAnswer` rejecting every malformed shape); the source-provenance rules (metadata schema completeness, no invented approval/owner/permission/link fields, marketing collateral never marked `confirmed`, the Carexia and AlbacMat conflicts staying flagged, and the system prompt's anti-silent-resolution instructions); the knowledge-gap log and feedback log (`appendGap`/`readGaps`/`appendFeedback`/`readFeedback` round-tripping entries correctly, newest-first ordering, request validation, and HTML-escaping so a malicious question can't inject markup into either admin page); and the streaming pipeline (`lib/streamingAnswer.js`'s incremental JSON-string extraction — partial content before the closing quote, escape-sequence decoding, graceful handling of a chunk boundary landing mid-escape-sequence — and `lib/chatStream.js`'s frame sequencing against a fake stream, including that a genuine model `cannot_answer` is distinguished from a technical-failure `fallbackAnswer()` so only real knowledge gaps get logged).
+
+The streaming pipeline was also verified against a real end-to-end request: a throwaway fake `/v1/messages` SSE server was pointed at via `ANTHROPIC_BASE_URL` (which the SDK reads natively) so the actual `client.messages.stream()` call, `lib/chatStream.js`, and the browser's NDJSON-reading loop in `public/index.html` all ran for real, confirming the answer genuinely reveals character-by-character in the browser rather than arriving in one block.
 
 ## Deploying to Render
 
@@ -126,7 +155,7 @@ Edit or add files under `knowledge/`. Each file should be a self-contained markd
 - Deliberately excludes the ~100-file legacy `Info From Suppliers/HoverTech (Supplier) Info` SharePoint archive (2011-2024) and the scattered per-hospital TrenGuard evaluation forms/quotes (2019-2021) sitting in individual rep folders — the bot will say it doesn't have something if it's only in that older material.
 - For TrenGuard, JDHG's 2024 User Guide is treated as authoritative over the manufacturer's original 2015 IFU where they conflict — see the note in `knowledge/trenguard-usage-and-ifu.md`.
 - Basic auth (single shared username/password) only — fine for a small pilot, not real per-user access control or audit logging. Revisit if this becomes permanent.
-- No conversation persistence — history only lives in the browser tab.
+- Conversation persistence is per-browser `localStorage`, not server-side — clearing browser data or switching devices loses history; there's no cross-device sync or server-side transcript storage.
 
 ## Unresolved knowledge gaps and sources requiring human approval
 
