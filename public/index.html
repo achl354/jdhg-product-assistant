@@ -248,6 +248,14 @@
     border-left: 3px solid var(--customer-accent);
     color: var(--customer-fg);
   }
+  .reference-line {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(127,127,127,0.2);
+    font-size: 11.5px;
+    font-style: italic;
+    color: var(--muted);
+  }
   .box-head {
     display: flex;
     align-items: center;
@@ -484,6 +492,20 @@
       return html;
     }
 
+    // customer_ready is instructed to end with a trailing "Reference: ..."
+    // line, on its own paragraph, rather than citing the source mid-sentence
+    // (see lib/prompt.js rule 7). Render that line distinctly (smaller,
+    // muted) instead of as a regular paragraph — falls back to plain
+    // renderMarkdown if the model didn't follow the format, so this never
+    // breaks rendering even on an unexpected shape.
+    function renderCustomerReady(text) {
+      const raw = text || "";
+      const match = raw.match(/^([\s\S]*?)\n\s*\n(Reference:.+)$/i);
+      if (!match) return renderMarkdown(raw);
+      const [, body, reference] = match;
+      return renderMarkdown(body) + `<div class="reference-line">${inlineFormat(escapeHtml(reference.trim()))}</div>`;
+    }
+
     function autoResizeInput() {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 140) + "px";
@@ -704,7 +726,7 @@
         box.appendChild(head);
         const content2 = document.createElement("div");
         content2.className = "md-content";
-        content2.innerHTML = renderMarkdown(data.customer_ready);
+        content2.innerHTML = renderCustomerReady(data.customer_ready);
         box.appendChild(content2);
         block.appendChild(box);
       }
