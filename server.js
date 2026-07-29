@@ -36,10 +36,12 @@ import { assertAuthConfigured, createBasicAuthMiddleware } from "./lib/auth.js";
 import { validateChatRequest, MAX_REQUEST_BODY_SIZE } from "./lib/requestValidation.js";
 import { ANSWER_TOOL, ANSWER_TOOL_NAME, fallbackAnswer, isWellFormedAnswer } from "./lib/answerContract.js";
 import { STATIC_INSTRUCTIONS } from "./lib/prompt.js";
+import { appendGap, readGaps, renderGapsPage } from "./lib/gapLog.js";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
 const PORT = process.env.PORT || 3000;
 const KNOWLEDGE_DIR = path.join(process.cwd(), "knowledge");
+const GAPS_LOG_PATH = path.join(process.cwd(), "data", "knowledge-gaps.jsonl");
 const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER;
 const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
@@ -128,11 +130,34 @@ app.post("/api/chat", async (req, res) => {
       return res.status(502).json(fallbackAnswer("the assistant's response could not be parsed"));
     }
 
+    // Only a real, well-formed "cannot_answer" counts as a knowledge gap —
+    // never the technical-failure fallbackAnswer() paths above/below, which
+    // are server problems, not missing content.
+    if (toolUse.input.status === "cannot_answer") {
+      try {
+        appendGap(GAPS_LOG_PATH, {
+          timestamp: new Date().toISOString(),
+          question: message,
+          answer: toolUse.input.answer
+        });
+      } catch (err) {
+        console.error("Failed to log knowledge gap:", err.message);
+      }
+    }
+
     res.json(toolUse.input);
   } catch (err) {
     console.error("Chat request failed:", err.message);
     res.status(502).json(fallbackAnswer("failed to reach the assistant"));
   }
+});
+
+// Basic-auth-protected (same middleware as everything else, applied above)
+// review page for questions the bot had no knowledge-base coverage for.
+app.get("/admin/gaps", (req, res) => {
+  const gaps = readGaps(GAPS_LOG_PATH);
+  res.set("Content-Type", "text/html");
+  res.send(renderGapsPage(gaps));
 });
 
 // Catch-all error handler: express routes body-parser failures (bad JSON,

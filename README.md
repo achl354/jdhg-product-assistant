@@ -20,6 +20,7 @@ Business logic lives in `lib/`, independent of Express and the live Anthropic AP
 - `lib/auth.js` — basic-auth gate and the production fail-fast startup check.
 - `lib/answerContract.js` — the `provide_answer` tool schema, the fallback answer shape, and defensive validation of the model's output.
 - `lib/prompt.js` — the system prompt / operating rules given to the model.
+- `lib/gapLog.js` — append-only log of questions with no knowledge-base coverage, plus the `/admin/gaps` review page (see below).
 - `server.js` — wires the above into an Express app; no business logic of its own.
 
 ## Knowledge routing (cross-platform)
@@ -43,7 +44,15 @@ At startup, `findMissingKnowledgeFiles` checks every file referenced by `KNOWLED
 
 The response is validated twice: once by the Claude tool schema itself, and again server-side by `isWellFormedAnswer` before it's ever sent to the browser — if either the model doesn't call the tool or the output doesn't match the expected shape, the server returns `fallbackAnswer(...)` (always `status: "cannot_answer"`) instead of passing through anything unvalidated.
 
-In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer, a sources line, and — only when present — a blue "copy-ready customer wording" box and a separate amber "internal caveat" box, so a rep can visually tell at a glance what's safe to read/paste to a customer versus what's for their own decision-making only.
+In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer (with real markdown rendering — headings/bold/lists, not raw `#`/`**` symbols), a sources line, and — only when present — a blue "copy-ready customer wording" box (with a one-click Copy button) and a separate amber "internal caveat" box, so a rep can visually tell at a glance what's safe to read/paste to a customer versus what's for their own decision-making only. The interface is a single, focused chat column — no sidebar/quick-links — kept deliberately simple after early pilot feedback that a topic-picker sidebar wasn't adding value.
+
+## Flagged knowledge gaps (`/admin/gaps`)
+
+Whenever the model returns a real, well-formed `status: "cannot_answer"` (the knowledge base genuinely has nothing on the topic — not a technical failure like a missing API key, and not `needs_confirmation`, which already has material, just conflicting/incomplete), the server appends an entry — timestamp, the question, and the answer given — to `data/knowledge-gaps.jsonl`. Visit `/admin/gaps` (behind the same basic-auth login reps use) to review flagged questions and decide what new knowledge content to add.
+
+This is a log-and-review mechanism, not a live notification — nothing is emailed or pushed anywhere automatically. Two things worth knowing:
+- **Ephemeral disk**: on a host like Render, `data/knowledge-gaps.jsonl` is wiped whenever a new deploy creates a fresh filesystem (not on sleep/wake, only on redeploys). Fine for a pilot; if gap history needs to survive redeploys long-term, move it to a small database or external store later.
+- **No email/Slack alerting yet** — deliberately deferred until there's a mail-sending account (SMTP credentials or a transactional email provider) to wire up; the log-and-review page needs no such setup and works immediately.
 
 ### The four statuses
 
@@ -92,7 +101,7 @@ Then open http://localhost:3000. Without `BASIC_AUTH_USER`/`BASIC_AUTH_PASS` set
 npm test
 ```
 
-Runs Node's built-in test runner (`node --test`, no extra dependency) over everything in `test/`. Covers: every `KNOWLEDGE_INDEX`/`ALWAYS_INCLUDE` file actually exists on disk; the Windows/Linux knowledge-ID regression (including a direct reproduction of the old `path.join`-based bug via `path.win32.join`, proving the fixed loader no longer produces backslash-separated IDs); "Hygenica" routing to `marketing/hygenica.md`; at least one routing test question per `KNOWLEDGE_INDEX` entry; follow-up questions retaining product context via recent history; an unmatched question falling back to the full knowledge set; the full request-validation matrix (message/history length, malformed roles, non-string content, extra fields); the auth startup gate (configured / dev-mode / production-without-override / explicit override) and the basic-auth middleware itself; the `provide_answer` contract (schema requiredness, status enum, `isWellFormedAnswer` rejecting every malformed shape); and the source-provenance rules (metadata schema completeness, no invented approval/owner/permission/link fields, marketing collateral never marked `confirmed`, the Carexia and AlbacMat conflicts staying flagged, and the system prompt's anti-silent-resolution instructions).
+Runs Node's built-in test runner (`node --test`, no extra dependency) over everything in `test/`. Covers: every `KNOWLEDGE_INDEX`/`ALWAYS_INCLUDE` file actually exists on disk; the Windows/Linux knowledge-ID regression (including a direct reproduction of the old `path.join`-based bug via `path.win32.join`, proving the fixed loader no longer produces backslash-separated IDs); "Hygenica" routing to `marketing/hygenica.md`; at least one routing test question per `KNOWLEDGE_INDEX` entry; follow-up questions retaining product context via recent history; an unmatched question falling back to the full knowledge set; the full request-validation matrix (message/history length, malformed roles, non-string content, extra fields); the auth startup gate (configured / dev-mode / production-without-override / explicit override) and the basic-auth middleware itself; the `provide_answer` contract (schema requiredness, status enum, `isWellFormedAnswer` rejecting every malformed shape); the source-provenance rules (metadata schema completeness, no invented approval/owner/permission/link fields, marketing collateral never marked `confirmed`, the Carexia and AlbacMat conflicts staying flagged, and the system prompt's anti-silent-resolution instructions); and the knowledge-gap log (`appendGap`/`readGaps` round-tripping entries correctly, newest-first ordering, and `renderGapsPage` escaping HTML so a malicious question can't inject markup into the admin page).
 
 ## Deploying to Render
 

@@ -26,134 +26,36 @@
   }
   #app {
     display: flex;
+    flex-direction: column;
     height: 100vh;
-    max-width: 1180px;
+    max-width: 760px;
     margin: 0 auto;
     background: var(--panel);
     box-shadow: 0 0 40px rgba(27, 63, 115, 0.08);
   }
 
-  /* --- Sidebar --- */
-  #sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-dark) 100%);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    padding: 18px 14px;
-    overflow-y: auto;
-    transition: transform 0.25s ease;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 6px 18px;
-    border-bottom: 1px solid rgba(255,255,255,0.15);
-    margin-bottom: 14px;
-  }
-  .brand-mark {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 14px;
-    letter-spacing: 0.02em;
-    flex-shrink: 0;
-  }
-  .brand-title {
-    font-weight: 700;
-    font-size: 14.5px;
-    line-height: 1.25;
-  }
-  .brand-sub {
-    font-size: 11px;
-    opacity: 0.75;
-    margin-top: 1px;
-  }
-  .quick-topics-label {
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.6;
-    margin: 14px 6px 6px;
-  }
-  .topic-group + .topic-group .quick-topics-label {
-    margin-top: 18px;
-  }
-  .topic-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.08);
-    color: #fff;
-    padding: 8px 10px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    margin-bottom: 6px;
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-  .topic-btn:hover, .topic-btn:focus-visible {
-    background: rgba(255,255,255,0.16);
-    outline: none;
-  }
-  .sidebar-spacer { flex: 1; }
-  #clearBtn {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #fff;
-    padding: 9px 10px;
-    border-radius: 8px;
-    font-size: 12.5px;
-    cursor: pointer;
-    margin-top: 10px;
-  }
-  #clearBtn:hover { background: rgba(255,255,255,0.18); }
-
-  #sidebarOverlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.45);
-    z-index: 20;
-  }
-
-  /* --- Main column --- */
-  #main {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-  }
   header {
     background: linear-gradient(90deg, var(--navy), #24487F);
     color: #fff;
     padding: 14px 18px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 12px;
     flex-shrink: 0;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    z-index: 5;
   }
-  #menuToggle {
-    display: none;
-    background: rgba(255,255,255,0.12);
-    border: none;
-    color: #fff;
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
+  .header-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
     flex-shrink: 0;
   }
   .header-title {
@@ -166,6 +68,18 @@
     opacity: 0.82;
     margin-top: 2px;
   }
+  #clearBtn {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  #clearBtn:hover { background: rgba(255,255,255,0.22); }
 
   #log {
     flex: 1;
@@ -378,74 +292,27 @@
 
   @media (max-width: 780px) {
     #app { max-width: none; box-shadow: none; }
-    #sidebar {
-      position: fixed;
-      inset: 0 auto 0 0;
-      z-index: 30;
-      transform: translateX(-100%);
-    }
-    #sidebar.open { transform: translateX(0); }
-    #sidebarOverlay.open { display: block; }
-    #menuToggle { display: inline-flex; align-items: center; justify-content: center; }
     .row, .bot-block { max-width: 96%; }
   }
 </style>
 </head>
 <body>
   <div id="app">
-    <aside id="sidebar">
-      <div class="brand">
+    <header>
+      <div class="header-left">
         <div class="brand-mark">JD</div>
-        <div>
-          <div class="brand-title">JDHG Product Assistant</div>
-          <div class="brand-sub">Internal pilot</div>
-        </div>
-      </div>
-
-      <div class="topic-group">
-        <div class="quick-topics-label">HoverTech &amp; TrenGuard</div>
-        <button class="topic-btn" data-question="What is the laundering and cleaning process for the reusable HoverMatt?">HoverMatt cleaning</button>
-        <button class="topic-btn" data-question="How do I use the HoverJack to lift a fallen patient?">HoverJack usage</button>
-        <button class="topic-btn" data-question="What are the HoverSling's key features and sizing?">HoverSling</button>
-        <button class="topic-btn" data-question="What is the ARTG/GMDN listing and safe working load for TrenGuard?">TrenGuard ARTG &amp; specs</button>
-      </div>
-
-      <div class="topic-group">
-        <div class="quick-topics-label">Other product lines</div>
-        <button class="topic-btn" data-question="Tell me about the NetZero underpad and curtain range.">NetZero</button>
-        <button class="topic-btn" data-question="What antimicrobial technology does Hygenica use in its curtains?">Hygenica</button>
-        <button class="topic-btn" data-question="How does the Medsalv remanufacturing program work?">Medsalv</button>
-        <button class="topic-btn" data-question="What are the specs of the MiniMaxx bariatric wheelchair?">MiniMaxx</button>
-        <button class="topic-btn" data-question="What is the safe working load for the AlbacMat evacuation mat?">AlbacMat</button>
-        <button class="topic-btn" data-question="What is the safe working load for the Carexia FPVE chair?">Carexia</button>
-        <button class="topic-btn" data-question="Tell me about the I-MOVE EZ-GO transfer chair range.">I-MOVE</button>
-        <button class="topic-btn" data-question="Which Trulife Pressurecare products suit the prone position?">Trulife Pressurecare</button>
-        <button class="topic-btn" data-question="How does the Raizer II lifting chair work?">Raizer</button>
-        <button class="topic-btn" data-question="What is the AMIGO Patient Escort Mover used for?">AMIGO PEM</button>
-        <button class="topic-btn" data-question="What are the specs of the Clavia FCD chemo/dialysis chair?">Clavia</button>
-        <button class="topic-btn" data-question="Tell me about the Easi Rider and Easi Mover.">Easi Rider/Mover</button>
-      </div>
-
-      <div class="sidebar-spacer"></div>
-      <button id="clearBtn" type="button">Clear conversation</button>
-    </aside>
-
-    <div id="sidebarOverlay"></div>
-
-    <main id="main">
-      <header>
-        <button id="menuToggle" type="button" aria-label="Toggle menu">&#9776;</button>
         <div>
           <div class="header-title">JDHG Product Assistant</div>
           <div class="sub">Pilot &middot; answers only from a curated knowledge base</div>
         </div>
-      </header>
-      <div id="log"></div>
-      <form id="form">
-        <input id="input" type="text" placeholder="Ask about any JDHG product..." autocomplete="off" />
-        <button id="send" type="submit">Send</button>
-      </form>
-    </main>
+      </div>
+      <button id="clearBtn" type="button">Clear</button>
+    </header>
+    <div id="log"></div>
+    <form id="form">
+      <input id="input" type="text" placeholder="Ask about any JDHG product..." autocomplete="off" />
+      <button id="send" type="submit">Send</button>
+    </form>
   </div>
 
   <script>
@@ -453,9 +320,6 @@
     const form = document.getElementById("form");
     const input = document.getElementById("input");
     const send = document.getElementById("send");
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
-    const menuToggle = document.getElementById("menuToggle");
     const clearBtn = document.getElementById("clearBtn");
     let history = [];
 
@@ -466,7 +330,7 @@
       cannot_answer: "Cannot answer"
     };
 
-    const GREETING = "Hi, I'm the JDHG Product Assistant pilot. Ask me about specs, ARTG/GMDN details, usage steps, or warnings for any product in the range — or pick a quick topic on the left.";
+    const GREETING = "Hi, I'm the JDHG Product Assistant pilot. Ask me about specs, ARTG/GMDN details, usage steps, or warnings for any product in the range.";
 
     function timeNow() {
       return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -682,27 +546,8 @@
       addSimpleMessage(GREETING, "bot");
     }
 
-    function closeSidebar() {
-      sidebar.classList.remove("open");
-      sidebarOverlay.classList.remove("open");
-    }
-
     resetConversation();
-
-    document.querySelectorAll(".topic-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        input.value = btn.dataset.question;
-        input.focus();
-        closeSidebar();
-      });
-    });
-
     clearBtn.addEventListener("click", resetConversation);
-    menuToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("open");
-      sidebarOverlay.classList.toggle("open");
-    });
-    sidebarOverlay.addEventListener("click", closeSidebar);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
