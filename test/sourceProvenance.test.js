@@ -93,16 +93,19 @@ test("AlbacMat's conflicting safe-working-load figures (470kg flyer vs 500kg man
   assert.match(manualContent, /NEEDS CONFIRMATION/);
 });
 
-test("EasiMove's two conflicting ARTG numbers are flagged needs_confirmation, not resolved to one", () => {
+test("EasiMove SPU's ARTG number (528531) is confirmed, while PRO's assignment and 343300 stay flagged rather than assumed", () => {
   const artgMeta = sourcesMeta.sources["easimove-artg-and-regulatory.md"];
   assert.ok(artgMeta.known_conflicts.length > 0, "expected easimove-artg-and-regulatory.md to have a known_conflicts entry");
   const conflictText = artgMeta.known_conflicts.join(" ").toLowerCase();
   assert.match(conflictText, /528531/);
+  assert.match(conflictText, /confirmed by jdhg/);
   assert.match(conflictText, /343300/);
+  assert.match(conflictText, /not confirmed/);
 
   const artgContent = KNOWLEDGE_FILES.get("easimove-artg-and-regulatory.md");
   assert.match(artgContent, /NEEDS CONFIRMATION/);
-  assert.match(artgContent, /Do not present either 528531 or 343300 as definitively/);
+  assert.match(artgContent, /Confirmed by JDHG \(2026-07-29\): 528531 is the ARTG number for EasiMove SPU/);
+  assert.match(artgContent, /Not confirmed to apply to any current EasiMove product/);
 });
 
 test("EasiLift's marketing-only coverage and pre-launch roadmap status are flagged, not presented as confirmed availability", () => {
