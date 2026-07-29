@@ -227,8 +227,6 @@
     letter-spacing: 0.04em;
   }
   .customer-ready-box .label { color: #2563EB; }
-  .box-content p { margin: 0 0 10px; }
-  .box-content p:last-child { margin-bottom: 0; }
   .internal-caveat-box .label { color: #B45309; }
   .copy-btn {
     background: #fff;
@@ -384,19 +382,6 @@
       return html;
     }
 
-    // Simpler than renderMarkdown: customer_ready/internal_caveat are plain
-    // humanized prose with no markdown symbols by design (see lib/prompt.js),
-    // so this only needs to turn blank-line-separated paragraphs into <p>
-    // tags rather than one run-on text block.
-    function renderParagraphs(text) {
-      return escapeHtml(text || "")
-        .split(/\n\s*\n/)
-        .map((para) => para.trim())
-        .filter(Boolean)
-        .map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`)
-        .join("");
-    }
-
     function addSimpleMessage(text, cls) {
       const row = document.createElement("div");
       row.className = "row " + (cls === "user" ? "user" : "bot");
@@ -531,8 +516,8 @@
         head.appendChild(copyBtn);
         box.appendChild(head);
         const content = document.createElement("div");
-        content.className = "box-content";
-        content.innerHTML = renderParagraphs(data.customer_ready);
+        content.className = "md-content";
+        content.innerHTML = renderMarkdown(data.customer_ready);
         box.appendChild(content);
         block.appendChild(box);
       }
@@ -548,8 +533,8 @@
         head.appendChild(label);
         box.appendChild(head);
         const content = document.createElement("div");
-        content.className = "box-content";
-        content.innerHTML = renderParagraphs(data.internal_caveat);
+        content.className = "md-content";
+        content.innerHTML = renderMarkdown(data.internal_caveat);
         box.appendChild(content);
         block.appendChild(box);
       }
