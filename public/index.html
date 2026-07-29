@@ -24,7 +24,6 @@
     --status-cannot-bg: #F3F4F6; --status-cannot-fg: #4B5563;
     --error-bg: #FEF2F2; --error-border: #FCA5A5; --error-fg: #991B1B;
     --customer-bg: #EFF6FF; --customer-border: #BFDBFE; --customer-fg: #1E3A8A; --customer-accent: #2563EB;
-    --caveat-bg: #FFFBEB; --caveat-border: #FDE68A; --caveat-fg: #78350F; --caveat-accent: #D97706;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -40,7 +39,6 @@
       --status-cannot-bg: #334155; --status-cannot-fg: #CBD5E1;
       --error-bg: #3F1616; --error-border: #7F1D1D; --error-fg: #FCA5A5;
       --customer-bg: #0F2942; --customer-border: #1E4976; --customer-fg: #BFDBFE; --customer-accent: #3B82F6;
-      --caveat-bg: #2E2006; --caveat-border: #78350F; --caveat-fg: #FDE68A; --caveat-accent: #D97706;
     }
   }
   * { box-sizing: border-box; }
@@ -240,23 +238,15 @@
     color: var(--muted);
     padding-left: 4px;
   }
-  .customer-ready-box, .internal-caveat-box {
+  .customer-ready-box {
     border-radius: 10px;
     padding: 12px 14px;
     font-size: 13.5px;
     line-height: 1.6;
-  }
-  .customer-ready-box {
     background: var(--customer-bg);
     border: 1px solid var(--customer-border);
     border-left: 3px solid var(--customer-accent);
     color: var(--customer-fg);
-  }
-  .internal-caveat-box {
-    background: var(--caveat-bg);
-    border: 1px solid var(--caveat-border);
-    border-left: 3px solid var(--caveat-accent);
-    color: var(--caveat-fg);
   }
   .box-head {
     display: flex;
@@ -273,7 +263,6 @@
     letter-spacing: 0.04em;
   }
   .customer-ready-box .label { color: var(--customer-accent); }
-  .internal-caveat-box .label { color: var(--caveat-accent); }
   .copy-btn {
     background: var(--panel);
     border: 1px solid var(--customer-border);
@@ -717,23 +706,6 @@
         content2.className = "md-content";
         content2.innerHTML = renderMarkdown(data.customer_ready);
         box.appendChild(content2);
-        block.appendChild(box);
-      }
-
-      if (data.internal_caveat) {
-        const box = document.createElement("div");
-        box.className = "internal-caveat-box";
-        const head = document.createElement("div");
-        head.className = "box-head";
-        const label = document.createElement("span");
-        label.className = "label";
-        label.textContent = "Internal caveat — do not share with customer";
-        head.appendChild(label);
-        box.appendChild(head);
-        const content3 = document.createElement("div");
-        content3.className = "md-content";
-        content3.innerHTML = renderMarkdown(data.internal_caveat);
-        box.appendChild(content3);
         block.appendChild(box);
       }
 

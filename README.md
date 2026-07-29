@@ -38,16 +38,15 @@ At startup, `findMissingKnowledgeFiles` checks every file referenced by `KNOWLED
 
 | Field | Meaning |
 |---|---|
-| `answer` | Full internal answer, including caveats inline. |
+| `answer` | Full internal answer, including any caveats inline. |
 | `status` | One of `confirmed` / `supported` / `needs_confirmation` / `cannot_answer` (see below). |
 | `sources` | Knowledge document IDs the answer draws from. |
-| `internal_caveat` | Internal-only guidance for the rep, or `null`. Never phrased for a customer to hear. |
 | `customer_ready` | A customer-safe, quotable version of the answer with no internal hedging — empty string if nothing can be safely told to a customer yet. |
 | `related_documents` | Other document IDs that might be relevant follow-ups. |
 
 The response is validated twice: once by the Claude tool schema itself, and again server-side by `isWellFormedAnswer` before it's ever sent to the browser — if either the model doesn't call the tool or the output doesn't match the expected shape, the server returns `fallbackAnswer(...)` (always `status: "cannot_answer"`) instead of passing through anything unvalidated.
 
-In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer (with real markdown rendering — headings/bold/lists, not raw `#`/`**` symbols), a sources line, and — only when present — a blue "copy-ready customer wording" box (with a one-click Copy button) and a separate amber "internal caveat" box, so a rep can visually tell at a glance what's safe to read/paste to a customer versus what's for their own decision-making only. The interface is a single, focused chat column — no sidebar/quick-links — kept deliberately simple after early pilot feedback that a topic-picker sidebar wasn't adding value.
+In the UI (`public/index.html`), each bot reply renders as a coloured status badge, the answer (with real markdown rendering — headings/bold/lists, not raw `#`/`**` symbols), a sources line, and — only when present — a blue "copy-ready customer wording" box with a one-click Copy button. An earlier separate amber "internal caveat" box was removed after pilot feedback — any internal caveat now stays inline in the main answer text (which was always the field's design — "the full answer, including any caveats inline"), rather than a second box. The interface is a single, focused chat column — no sidebar/quick-links — kept deliberately simple after early pilot feedback that a topic-picker sidebar wasn't adding value either.
 
 ## Streaming responses
 

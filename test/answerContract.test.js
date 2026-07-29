@@ -8,7 +8,6 @@ function validAnswer(overrides = {}) {
     answer: "The device has a 200kg safe working load.",
     status: "confirmed",
     sources: ["hovermatt-usage-and-ifu.md"],
-    internal_caveat: null,
     customer_ready: "The device has a 200kg safe working load.",
     related_documents: [],
     ...overrides
@@ -19,7 +18,7 @@ test("fallbackAnswer produces a well-formed, cannot_answer-status object", () =>
   const fallback = fallbackAnswer("API timed out");
   assert.equal(isWellFormedAnswer(fallback), true);
   assert.equal(fallback.status, "cannot_answer");
-  assert.equal(fallback.internal_caveat, "API timed out");
+  assert.match(fallback.answer, /API timed out/);
 });
 
 test("isWellFormedAnswer accepts a fully valid candidate", () => {
@@ -49,11 +48,6 @@ test("isWellFormedAnswer rejects non-array or non-string-array sources", () => {
   assert.equal(isWellFormedAnswer(validAnswer({ sources: [1, 2] })), false);
 });
 
-test("isWellFormedAnswer rejects an internal_caveat that isn't string or null", () => {
-  assert.equal(isWellFormedAnswer(validAnswer({ internal_caveat: 5 })), false);
-  assert.equal(isWellFormedAnswer(validAnswer({ internal_caveat: undefined })), false);
-});
-
 test("isWellFormedAnswer rejects a non-string customer_ready", () => {
   assert.equal(isWellFormedAnswer(validAnswer({ customer_ready: null })), false);
 });
@@ -65,7 +59,7 @@ test("isWellFormedAnswer rejects non-array or non-string-array related_documents
 
 test("the provide_answer tool schema requires every field of the answer contract", () => {
   const required = ANSWER_TOOL.input_schema.required;
-  for (const field of ["answer", "status", "sources", "internal_caveat", "customer_ready", "related_documents"]) {
+  for (const field of ["answer", "status", "sources", "customer_ready", "related_documents"]) {
     assert.ok(required.includes(field), `expected ${field} to be required`);
   }
 });

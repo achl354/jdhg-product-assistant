@@ -37,7 +37,6 @@ test("emits a growing answer_delta frame per raw chunk, then a final frame with 
     answer: "The HoverMatt has a 200kg SWL.",
     status: "confirmed",
     sources: ["hovermatt-usage-and-ifu.md"],
-    internal_caveat: null,
     customer_ready: "The HoverMatt has a 200kg safe working load.",
     related_documents: []
   };
@@ -67,7 +66,6 @@ test("reveals the answer text incrementally even mid-string, character by charac
     answer: "Step one. Step two. Step three.",
     status: "confirmed",
     sources: [],
-    internal_caveat: null,
     customer_ready: "",
     related_documents: []
   });
@@ -95,7 +93,6 @@ test("does not re-emit a delta frame when the extracted answer text hasn't chang
     answer: "Same text",
     status: "confirmed",
     sources: [],
-    internal_caveat: null,
     customer_ready: "Same text",
     related_documents: []
   };
@@ -121,7 +118,6 @@ test("a genuine well-formed cannot_answer is reported as isGenuineCannotAnswer",
     answer: "I don't have that in my current knowledge base.",
     status: "cannot_answer",
     sources: [],
-    internal_caveat: null,
     customer_ready: "",
     related_documents: []
   };
@@ -141,7 +137,7 @@ test("a thrown error while streaming resolves to fallbackAnswer, not a genuine c
 
   assert.equal(result.isGenuineCannotAnswer, false);
   assert.equal(result.data.status, "cannot_answer");
-  assert.match(result.data.internal_caveat, /failed to reach the assistant/);
+  assert.match(result.data.answer, /failed to reach the assistant/);
   assert.equal(frames.at(-1).type, "final");
   assert.deepEqual(frames.at(-1).data, result.data);
 });
@@ -153,7 +149,7 @@ test("a missing tool_use block resolves to fallbackAnswer, not a genuine cannot_
 
   assert.equal(result.isGenuineCannotAnswer, false);
   assert.equal(result.data.status, "cannot_answer");
-  assert.match(result.data.internal_caveat, /could not be parsed/);
+  assert.match(result.data.answer, /could not be parsed/);
 });
 
 test("a malformed tool_use input (fails isWellFormedAnswer) resolves to fallbackAnswer, not a genuine cannot_answer", async () => {
