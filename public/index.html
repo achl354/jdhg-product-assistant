@@ -195,33 +195,40 @@
     padding-left: 4px;
   }
   .customer-ready-box, .internal-caveat-box {
-    border-radius: 12px;
-    padding: 10px 12px;
-    font-size: 13px;
-    line-height: 1.45;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
   }
   .customer-ready-box {
     background: #EFF6FF;
     border: 1px solid #BFDBFE;
+    border-left: 3px solid #2563EB;
     color: #1E3A8A;
   }
   .internal-caveat-box {
     background: #FFFBEB;
     border: 1px solid #FDE68A;
+    border-left: 3px solid #D97706;
     color: #78350F;
   }
   .box-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
   }
   .box-head .label {
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
   .customer-ready-box .label { color: #2563EB; }
+  .box-content p { margin: 0 0 10px; }
+  .box-content p:last-child { margin-bottom: 0; }
   .internal-caveat-box .label { color: #B45309; }
   .copy-btn {
     background: #fff;
@@ -377,6 +384,19 @@
       return html;
     }
 
+    // Simpler than renderMarkdown: customer_ready/internal_caveat are plain
+    // humanized prose with no markdown symbols by design (see lib/prompt.js),
+    // so this only needs to turn blank-line-separated paragraphs into <p>
+    // tags rather than one run-on text block.
+    function renderParagraphs(text) {
+      return escapeHtml(text || "")
+        .split(/\n\s*\n/)
+        .map((para) => para.trim())
+        .filter(Boolean)
+        .map((para) => `<p>${para.replace(/\n/g, "<br>")}</p>`)
+        .join("");
+    }
+
     function addSimpleMessage(text, cls) {
       const row = document.createElement("div");
       row.className = "row " + (cls === "user" ? "user" : "bot");
@@ -510,7 +530,10 @@
         copyBtn.addEventListener("click", () => copyToClipboard(data.customer_ready, copyBtn));
         head.appendChild(copyBtn);
         box.appendChild(head);
-        box.appendChild(document.createTextNode(data.customer_ready));
+        const content = document.createElement("div");
+        content.className = "box-content";
+        content.innerHTML = renderParagraphs(data.customer_ready);
+        box.appendChild(content);
         block.appendChild(box);
       }
 
@@ -524,7 +547,10 @@
         label.textContent = "Internal caveat — do not share with customer";
         head.appendChild(label);
         box.appendChild(head);
-        box.appendChild(document.createTextNode(data.internal_caveat));
+        const content = document.createElement("div");
+        content.className = "box-content";
+        content.innerHTML = renderParagraphs(data.internal_caveat);
+        box.appendChild(content);
         block.appendChild(box);
       }
 
