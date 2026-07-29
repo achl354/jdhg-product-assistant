@@ -93,6 +93,36 @@ test("AlbacMat's conflicting safe-working-load figures (470kg flyer vs 500kg man
   assert.match(manualContent, /NEEDS CONFIRMATION/);
 });
 
+test("EasiMove's two conflicting ARTG numbers are flagged needs_confirmation, not resolved to one", () => {
+  const artgMeta = sourcesMeta.sources["easimove-artg-and-regulatory.md"];
+  assert.ok(artgMeta.known_conflicts.length > 0, "expected easimove-artg-and-regulatory.md to have a known_conflicts entry");
+  const conflictText = artgMeta.known_conflicts.join(" ").toLowerCase();
+  assert.match(conflictText, /528531/);
+  assert.match(conflictText, /343300/);
+
+  const artgContent = KNOWLEDGE_FILES.get("easimove-artg-and-regulatory.md");
+  assert.match(artgContent, /NEEDS CONFIRMATION/);
+  assert.match(artgContent, /Do not present either 528531 or 343300 as definitively/);
+});
+
+test("EasiLift's marketing-only coverage and pre-launch roadmap status are flagged, not presented as confirmed availability", () => {
+  const easiliftMeta = sourcesMeta.sources["marketing/easilift.md"];
+  assert.equal(easiliftMeta.authority_level, "supported");
+  assert.ok(easiliftMeta.known_conflicts.length > 0);
+  const conflictText = easiliftMeta.known_conflicts.join(" ").toLowerCase();
+  assert.match(conflictText, /no manufacturer ifu/);
+  assert.match(conflictText, /confirm current commercial availability/);
+
+  const easiliftContent = KNOWLEDGE_FILES.get("marketing/easilift.md");
+  assert.match(easiliftContent, /NEEDS CONFIRMATION/);
+});
+
+test("the internal-use-only EasiMove competitor comparison is flagged as never customer-facing", () => {
+  const compContent = KNOWLEDGE_FILES.get("competitive-positioning-easimove.md");
+  assert.match(compContent, /INTERNAL USE ONLY/);
+  assert.match(compContent, /must never be presented to a customer/i);
+});
+
 test("the system prompt instructs the model to never silently resolve a flagged source ambiguity", () => {
   assert.match(STATIC_INSTRUCTIONS, /needs_confirmation/);
   assert.match(STATIC_INSTRUCTIONS, /Do not resolve the ambiguity yourself/);

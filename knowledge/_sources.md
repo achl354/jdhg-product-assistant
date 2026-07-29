@@ -46,3 +46,20 @@ Deliberately excluded from this v1 knowledge base: the legacy "Info From Supplie
 | marketing/easi-rider-mover.md | `Shared Documents/Easi Rider & Mover` — 1 flyer (JDHG040523) | |
 
 Pulled from `https://jdhealthcare.sharepoint.com/sites/JDSalesMarketingHub-MarketingMaterial/Shared Documents` via Claude + Microsoft 365 SharePoint connector (interactive session access — not a live app-level Graph API integration; see the re-sync runbook for how to refresh this later). Curated and first added: 2026-07-28.
+
+## DMG (DirectMed Group) EasiSystem range
+
+**Content type: mostly manufacturer IFUs (confirmed-tier) for EasiMove/EasiAir, marketing collateral (supported-tier) for the rest.** Sourced partly from company SharePoint (`Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove`) and partly from files the user uploaded directly. "EasiMove" and "Easi Rider/Mover" (above) are different, unrelated products despite similar names.
+
+| Knowledge file | Original source | Notes |
+|---|---|---|
+| easimove-pro-usage-and-ifu.md | DirectMed Group manufacturer IFU, "EasiMovePRO™ Instructions for Use," MHDM-EM34PRO, **Rev A-1 (23/07/2026)** | Supersedes an earlier Rev A (16/06/2026) copy also found in the same folder |
+| easimove-spu-usage-and-ifu.md | DirectMed Group manufacturer IFU, "EasiMoveSPU™ Instructions for Use," MHDM-EMSPU, Rev A (16/06/2026) | No later revision found at ingestion time |
+| easiair-usage-and-ifu.md | DirectMed Group manufacturer IFU, "EasiAir™ Instructions for Use," MHDM-EA-IFU-001, Rev A (05/06/2026) | User-uploaded file |
+| easimove-artg-and-regulatory.md | Two TGA ARTG certificates: 528531 (3/07/2026, cross-confirmed via both SharePoint and a user-uploaded copy) and 343300 (11/09/2020, found in the same SharePoint "TGA Cert" folder) | **Known conflict** — see the NEEDS CONFIRMATION note inside the file; do not present either number as definitively "the" EasiMove ARTG identifier |
+| easimove-validation-summary.md | JDHG-prepared "Test & Validation Summary," JDHG-VAL-EM-001 v1.1 (July 2026), based on supplier/factory validation testing | Supplier-reported data, not independently audited |
+| marketing/easimove.md | EasiMove PRO flyer (DMG-EMPRO-FLY-001), EasiMove SPU flyer (DMG-EMSPU-FLY-001), both JDHG170626 (user-uploaded); recycled-packaging/sustainability flyer found via SharePoint | Sustainability claims are DMG/JDHG-reported, not independently verified |
+| marketing/easilift.md | EasiLift flyer (DMG-EL-FLY-001) and comparative-evaluation sheet (DMG-CPE-EL-001), both JDHG (user-uploaded) | No manufacturer IFU or ARTG found for EasiLift — a DMG internal roadmap deck lists its formal launch as a future quarter; confirm current availability before quoting to a customer |
+| competitive-positioning-easimove.md | Two separate comparison documents: an internal "Competitor Comparison_JUN2024.pdf" (marked INTERNAL USE ONLY, found via SharePoint) and a DMG "EasiMoveSPU Comparison Sheet" (JDHG170626, user-uploaded) | The two documents use unrelated competitor-coding schemes — never cross-reference a code from one against the other; Document 1 must never reach a customer |
+
+Curated and first added: 2026-07-29.

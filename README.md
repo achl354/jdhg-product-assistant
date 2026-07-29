@@ -1,6 +1,6 @@
 # JDHG Product Assistant — pilot
 
-A small chat web app for JDHG reps to ask questions about JDHG's product range, grounded only in a curated set of vetted documents (see `knowledge/_sources.md` and `knowledge/sources.meta.json`). HoverTech and TrenGuard have full manufacturer IFU/usage manuals and ARTG certificates loaded; the rest of the catalogue (NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, Easi Rider/Mover) currently has only marketing collateral (flyers/booklets/fact sheets) loaded — the bot is instructed to present that tier accordingly rather than imply IFU-grade certainty.
+A small chat web app for JDHG reps to ask questions about JDHG's product range, grounded only in a curated set of vetted documents (see `knowledge/_sources.md` and `knowledge/sources.meta.json`). HoverTech, TrenGuard, and DMG's EasiMove PRO/SPU + EasiAir have full manufacturer IFU/usage manuals loaded (EasiMove additionally has ARTG certificates, though see the known ARTG-number conflict in the gaps list below); the rest of the catalogue (NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, Easi Rider/Mover, DMG's EasiLift) currently has only marketing collateral (flyers/booklets/fact sheets/comparison sheets) loaded — the bot is instructed to present that tier accordingly rather than imply IFU-grade certainty.
 
 This document covers the pilot-hardening pass: cross-platform routing, the answer contract, source metadata, claim-level provenance, request/access hardening, and testing. For the original build rationale see the "Why it's built this way" section below, unchanged from the initial pilot.
 
@@ -162,9 +162,9 @@ Edit or add files under `knowledge/`. Each file should be a self-contained markd
 
 This is the explicit deliverable for pilot sign-off — everything here needs a human decision before the bot's coverage can be considered fully settled. Full detail for each item lives in `knowledge/sources.meta.json` (`known_conflicts` per source).
 
-### Approval / governance gap affecting every single source (24/24)
+### Approval / governance gap affecting every single source (32/32)
 
-No formal JDHG document-approval workflow, named approver/owner, external-use (customer-facing) clearance, or stable document-control link exists in the systems this pilot had access to, for **any** source — including the pre-existing HoverTech and TrenGuard IFUs/ARTG certificates. Concretely, `approval_status`, `approver_owner`, `external_use_permission`, and `secure_document_link` are `needs_confirmation` for every entry in `knowledge/sources.meta.json`. Before this pilot is used to produce customer-facing wording at scale, JDHG/Regulatory should confirm, per source (or per document type as a shortcut): who is the approving owner, whether it's cleared for external/customer use, and where its authoritative, stable copy lives.
+No formal JDHG document-approval workflow, named approver/owner, external-use (customer-facing) clearance, or stable document-control link exists in the systems this pilot had access to, for **any** source — including the pre-existing HoverTech, TrenGuard, and EasiMove/EasiAir IFUs/ARTG certificates. Concretely, `approval_status`, `approver_owner`, `external_use_permission`, and `secure_document_link` are `needs_confirmation` for every entry in `knowledge/sources.meta.json`. Before this pilot is used to produce customer-facing wording at scale, JDHG/Regulatory should confirm, per source (or per document type as a shortcut): who is the approving owner, whether it's cleared for external/customer use, and where its authoritative, stable copy lives.
 
 ### Specific factual conflicts requiring a human decision
 
@@ -174,11 +174,13 @@ No formal JDHG document-approval workflow, named approver/owner, external-use (c
 4. **TrenGuard 600 Hybrid procedure pack ARTG number (`trenguard-artg-and-regulatory.md`)** — only the 450 Hybrid pack's ARTG number (290464) was found in the documents reviewed; the 600 Hybrid pack's own number could not be confirmed. **Needs confirmation with Regulatory.**
 5. **Medsalv remanufactured-device ARTG number (`marketing/medsalv.md`)** — the source flyers state remanufactured devices carry their own ARTG listing but don't give the number. **Needs confirmation with Medsalv/Regulatory.**
 6. **Carexia source PDF date conflict (`marketing/carexia.md`)** — the same source PDF carries two different date codes (JDHG121124 on the main flyer, JDHG140524 on the specifications page), unreconciled. Low materiality (doesn't affect product facts) but flagged for completeness.
+7. **EasiMove ARTG number (`easimove-artg-and-regulatory.md`)** — two ARTG identifiers were found (528531, registered 3/07/2026, GMDN "Inflatable patient transfer sliding mattress"; and 343300, registered 11/09/2020, GMDN "Lift, &lt;specify&gt;") with different manufacturers listed, and an internal JDHG spreadsheet excerpt separately suggested a third number was also in play for EasiMove SPU specifically. **Needs confirmation with JDHG/Regulatory** as to which number applies to which current EasiMove product before quoting one to a customer or in a tender/compliance document.
 
 ### Content gaps (not conflicts, but incomplete ingestion)
 
-7. **Hygenica "Info Pack" PDF (`marketing/hygenica.md`)** — exceeded this ingestion pass's size/token limit and was not fully processed. The booklet content captured is extensive but not confirmed exhaustive for this specific document.
-8. **Raizer JD PROCare Service Flyer (`marketing/raizer.md`)** — returned no extractable text (likely a scanned/image-only PDF) and was not ingested at all. A rep asking about JD PROCare servicing specifics should be told this isn't covered yet.
+8. **Hygenica "Info Pack" PDF (`marketing/hygenica.md`)** — exceeded this ingestion pass's size/token limit and was not fully processed. The booklet content captured is extensive but not confirmed exhaustive for this specific document.
+9. **Raizer JD PROCare Service Flyer (`marketing/raizer.md`)** — returned no extractable text (likely a scanned/image-only PDF) and was not ingested at all. A rep asking about JD PROCare servicing specifics should be told this isn't covered yet.
+10. **EasiLift (`marketing/easilift.md`)** — no manufacturer IFU or ARTG certificate was available at ingestion time (marketing collateral only); DMG's own internal roadmap deck (not customer-facing) places EasiLift's formal external launch in a future quarter relative to when that deck was written. **Confirm current commercial availability, pricing, and IFU status with JDHG/DMG** before quoting EasiLift to a customer.
 
 ### Statistics/claims sourced from marketing material, not independently verified by JDHG
 

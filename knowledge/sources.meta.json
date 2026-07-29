@@ -431,6 +431,149 @@
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Easi Rider & Mover",
       "secure_document_link": "needs_confirmation",
       "known_conflicts": []
+    },
+    "easimove-pro-usage-and-ifu.md": {
+      "source_document_name": "EasiMovePRO™ Instructions for Use, MHDM-EM34PRO",
+      "document_type": "manufacturer_ifu",
+      "revision_version": "Rev A-1",
+      "document_date": "2026-07-23 (Rev A-1); supersedes Rev A dated 2026-06-16",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "confirmed",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint: Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": []
+    },
+    "easimove-spu-usage-and-ifu.md": {
+      "source_document_name": "EasiMoveSPU™ Instructions for Use, MHDM-EMSPU",
+      "document_type": "manufacturer_ifu",
+      "revision_version": "Rev A",
+      "document_date": "2026-06-16",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "confirmed",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint: Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": []
+    },
+    "easiair-usage-and-ifu.md": {
+      "source_document_name": "EasiAir™ Instructions for Use, MHDM-EA-IFU-001",
+      "document_type": "manufacturer_ifu",
+      "revision_version": "Rev A",
+      "document_date": "2026-06-05",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "confirmed",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "User-uploaded file",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": []
+    },
+    "easimove-artg-and-regulatory.md": {
+      "source_document_name": "TGA ARTG certificates 528531 (Inflatable patient transfer sliding mattress) and 343300 (Lift, <specify>)",
+      "document_type": "artg_certificate",
+      "revision_version": "needs_confirmation",
+      "document_date": "ARTG start dates 2026-07-03 (528531) and 2020-09-11 (343300)",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "confirmed",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint: Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove/TGA Cert; also user-uploaded copy of 528531",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": [
+        "Two ARTG identifiers (528531 and 343300) were found associated with EasiMove/DirectMed lateral transfer mattress material, with different manufacturers, different GMDN classifications, and start dates four-plus years apart. An internal JDHG product master spreadsheet excerpt separately flagged its own reconciliation note about two different ARTG numbers being carried for EasiMove SPU, and the exact second number in that snippet did not precisely match either 528531 or 343300. Do not present either number as definitively correct for a specific EasiMove product without confirming with JDHG/Regulatory."
+      ]
+    },
+    "easimove-validation-summary.md": {
+      "source_document_name": "EasiMove Air-Assisted Lateral Transfer Mattress — Test & Validation Summary, JDHG-VAL-EM-001 v1.1",
+      "document_type": "internal_guidance",
+      "revision_version": "v1.1",
+      "document_date": "2026-07 (July 2026)",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "supported",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint (Teams Chat Files, personal OneDrive)",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": [
+        "All figures are supplier/factory validation testing under controlled conditions, summarised by JD Healthcare Group for procurement evaluation — not independently/third-party audited. Present as supplier-reported data, not verified clinical fact."
+      ]
+    },
+    "marketing/easimove.md": {
+      "source_document_name": "EasiMove PRO flyer (DMG-EMPRO-FLY-001), EasiMove SPU flyer (DMG-EMSPU-FLY-001), both JDHG170626; EasiMove SPU recycled-packaging/sustainability flyer",
+      "document_type": "marketing_collateral",
+      "revision_version": "V1.0 (flyers)",
+      "document_date": "2026-06-17 (flyers, JDHG170626); recycled-packaging flyer date not fully confirmed (filename suffix \"23AUG\", year unconfirmed)",
+      "page_or_section": "See per-section source tags inside the knowledge file — this file merges 3 source documents",
+      "authority_level": "supported",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint; flyers also user-uploaded",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": [
+        "\"Measured transfer performance\" and \"full-width coverage\" claims on the SPU flyer carry the manufacturer's own footnote that they're based on internal comparative testing and results may vary — not independently verified.",
+        "Sustainability/recycled-content and compostable-packaging claims are DMG/JDHG-reported, not independently audited by JDHG."
+      ]
+    },
+    "marketing/easilift.md": {
+      "source_document_name": "EasiLift flyer (DMG-EL-FLY-001) and comparative-evaluation sheet (DMG-CPE-EL-001), both JDHG",
+      "document_type": "marketing_collateral",
+      "revision_version": "V1.0",
+      "document_date": "2026-06-17 (flyer, JDHG170626); 2026-06-11 (comparison sheet, JDHG110626)",
+      "page_or_section": "needs_confirmation",
+      "authority_level": "supported",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "User-uploaded files",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": [
+        "No manufacturer IFU or ARTG certificate was found for EasiLift at ingestion time — SWL and other specs are marketing-sourced only, not cross-confirmed against IFU-grade documentation.",
+        "A DMG internal roadmap deck (June 2026) lists EasiLift's formal external launch as a future quarter (Q1 FY27) relative to when that deck was prepared, even though real flyer/comparison material already exists — confirm current commercial availability with JDHG/DMG before quoting to a customer.",
+        "\"Planned EasiAir GO compatibility\" is explicitly described as a future/roadmap item, not available today."
+      ]
+    },
+    "competitive-positioning-easimove.md": {
+      "source_document_name": "Competitor Comparison_JUN2024.pdf (internal, marked INTERNAL USE ONLY) and EasiMoveSPU Comparison Sheet (DMG, JDHG170626)",
+      "document_type": "internal_sales_positioning",
+      "revision_version": "needs_confirmation",
+      "document_date": "2024-06 (Document 1); 2026-06-17 (Document 2, JDHG170626)",
+      "page_or_section": "See per-document source tags inside the knowledge file — this file merges 2 source documents",
+      "authority_level": "supported",
+      "approval_status": "needs_confirmation",
+      "approver_owner": "needs_confirmation",
+      "last_reviewed_date": "2026-07-29",
+      "external_use_permission": "needs_confirmation",
+      "current_or_superseded": "current",
+      "known_location": "SharePoint; Document 2 also user-uploaded",
+      "secure_document_link": "needs_confirmation",
+      "known_conflicts": [
+        "The two merged documents use unrelated, non-overlapping competitor-coding schemes (\"H-Brand\"/\"P-Brand\" vs. \"HT-Branded\"/\"HM-Branded\"/\"LM-Branded\") — never assume a code in one refers to the same competitor as a similarly-lettered code in the other.",
+        "All pull-force/weight/material comparison figures in both documents are DMG/JDHG-reported internal testing, not independently audited.",
+        "Document 1 is explicitly marked INTERNAL USE ONLY and must never be presented to a customer."
+      ]
     }
   }
 }
