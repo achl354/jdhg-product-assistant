@@ -451,6 +451,19 @@
       }
     }
 
+    // Defensive cap, matching lib/requestValidation.js's MAX_HISTORY_MESSAGE_LENGTH
+    // server-side. Keeps this from ever locking up a conversation the way an
+    // oversized reply used to: without this, one long enough answer would sit
+    // in `history` forever and fail server-side validation on every later
+    // message in the same conversation, since history never shrinks except
+    // via "Clear". Only trims what's sent back to the model for context —
+    // the full answer is still shown on-screen via displayLog/addBotBlock.
+    const HISTORY_CONTENT_SAFE_LENGTH = 20000;
+    function truncateForHistory(text) {
+      if (text.length <= HISTORY_CONTENT_SAFE_LENGTH) return text;
+      return text.slice(0, HISTORY_CONTENT_SAFE_LENGTH) + "... [truncated for conversation context]";
+    }
+
     function escapeHtml(str) {
       return str
         .replace(/&/g, "&amp;")
@@ -868,7 +881,7 @@
         addBotBlock(finalData, message, botTime);
         displayLog.push({ type: "bot-block", data: finalData, question: message, time: botTime });
         history.push({ role: "user", content: message });
-        history.push({ role: "assistant", content: finalData.answer });
+        history.push({ role: "assistant", content: truncateForHistory(finalData.answer) });
         saveState();
       } catch (err) {
         thinking.remove();

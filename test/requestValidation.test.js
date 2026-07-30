@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { validateChatRequest, MAX_MESSAGE_LENGTH, MAX_HISTORY_MESSAGES } from "../lib/requestValidation.js";
+import { validateChatRequest, MAX_MESSAGE_LENGTH, MAX_HISTORY_MESSAGE_LENGTH, MAX_HISTORY_MESSAGES } from "../lib/requestValidation.js";
 
 test("accepts a minimal valid request (message only)", () => {
   assert.equal(validateChatRequest({ message: "Hello" }), null);
@@ -55,9 +55,14 @@ test("rejects a history entry with non-string content", () => {
   assert.match(validateChatRequest({ message: "hi", history }), /content must be a string/);
 });
 
-test("rejects a history entry with content over the length limit", () => {
-  const history = [{ role: "user", content: "a".repeat(MAX_MESSAGE_LENGTH + 1) }];
+test("rejects a history entry with content over the history-specific length limit", () => {
+  const history = [{ role: "user", content: "a".repeat(MAX_HISTORY_MESSAGE_LENGTH + 1) }];
   assert.match(validateChatRequest({ message: "hi", history }), /exceeds the/);
+});
+
+test("accepts a history entry longer than MAX_MESSAGE_LENGTH but within MAX_HISTORY_MESSAGE_LENGTH (a real prior assistant reply can exceed the fresh-message cap)", () => {
+  const history = [{ role: "assistant", content: "a".repeat(MAX_MESSAGE_LENGTH + 500) }];
+  assert.equal(validateChatRequest({ message: "hi", history }), null);
 });
 
 test("rejects a history entry with unexpected extra fields", () => {
