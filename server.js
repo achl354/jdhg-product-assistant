@@ -22,6 +22,7 @@
 import path from "path";
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import nodemailer from "nodemailer";
 
 import {
   ALWAYS_INCLUDE,
@@ -39,6 +40,7 @@ import { STATIC_INSTRUCTIONS } from "./lib/prompt.js";
 import { appendGap, readGaps, renderGapsPage } from "./lib/gapLog.js";
 import { runChatStream } from "./lib/chatStream.js";
 import { validateFeedbackRequest, appendFeedback, readFeedback, renderFeedbackPage } from "./lib/feedbackLog.js";
+import { isEmailAlertConfigured, buildDownvoteAlertEmail } from "./lib/emailAlert.js";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
 const PORT = process.env.PORT || 3000;
@@ -82,6 +84,24 @@ if (missingKnowledgeFiles.length > 0) {
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const basicAuth = createBasicAuthMiddleware({ user: BASIC_AUTH_USER, pass: BASIC_AUTH_PASS });
+
+// Downvote email alerts are entirely optional — only active when a full set
+// of SMTP env vars is present. Otherwise the feedback flow is unaffected,
+// just without the alert (mirrors how ANTHROPIC_API_KEY/BASIC_AUTH degrade).
+const emailAlertsEnabled = isEmailAlertConfigured(process.env);
+let mailTransporter = null;
+if (emailAlertsEnabled) {
+  mailTransporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === "true",
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+  });
+} else {
+  console.warn(
+    "WARNING: downvote email alerts are disabled — set SMTP_HOST, SMTP_USER, SMTP_PASS, and ALERT_EMAIL_TO to enable them."
+  );
+}
 
 const app = express();
 app.use(basicAuth);
@@ -174,12 +194,22 @@ app.post("/api/feedback", (req, res) => {
     return res.status(400).json({ error: validationError });
   }
   const { question, answer, rating } = req.body;
+  const entry = { timestamp: new Date().toISOString(), question, answer, rating };
   try {
-    appendFeedback(FEEDBACK_LOG_PATH, { timestamp: new Date().toISOString(), question, answer, rating });
+    appendFeedback(FEEDBACK_LOG_PATH, entry);
   } catch (err) {
     console.error("Failed to log feedback:", err.message);
     return res.status(500).json({ error: "Could not record feedback." });
   }
+
+  // Fire-and-forget: an alert-email failure (bad credentials, SMTP host
+  // down) must never affect the recorded feedback or the client response.
+  if (rating === "down" && mailTransporter) {
+    mailTransporter
+      .sendMail(buildDownvoteAlertEmail(entry, process.env))
+      .catch((err) => console.error("Failed to send downvote alert email:", err.message));
+  }
+
   res.json({ ok: true });
 });
 

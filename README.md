@@ -22,6 +22,7 @@ Business logic lives in `lib/`, independent of Express and the live Anthropic AP
 - `lib/prompt.js` — the system prompt / operating rules given to the model.
 - `lib/gapLog.js` — append-only log of questions with no knowledge-base coverage, plus the `/admin/gaps` review page (see below).
 - `lib/feedbackLog.js` — append-only log of per-answer thumbs up/down feedback, plus the `/admin/feedback` review page.
+- `lib/emailAlert.js` — decides whether downvote email alerting is configured and composes the alert email; no SMTP/network dependency itself (`server.js` owns the actual `nodemailer` transporter and send call).
 - `lib/chatStream.js` — orchestrates one streamed chat turn against an Anthropic `MessageStream`-shaped object, decoupled from Express/the live SDK so it's unit-testable with a fake stream.
 - `lib/streamingAnswer.js` — incrementally extracts the growing `answer` string out of the model's still-in-progress tool-call JSON, so the UI can reveal it as it's generated.
 - `server.js` — wires the above into an Express app; no business logic of its own.
@@ -64,13 +65,14 @@ Once the first `res.write()` happens the HTTP status is locked at 200, so any fa
 
 Whenever the model returns a real, well-formed `status: "cannot_answer"` (the knowledge base genuinely has nothing on the topic — not a technical failure like a missing API key, and not `needs_confirmation`, which already has material, just conflicting/incomplete), the server appends an entry — timestamp, the question, and the answer given — to `data/knowledge-gaps.jsonl`. Visit `/admin/gaps` (behind the same basic-auth login reps use) to review flagged questions and decide what new knowledge content to add.
 
-This is a log-and-review mechanism, not a live notification — nothing is emailed or pushed anywhere automatically. Two things worth knowing:
+This is a log-and-review mechanism, not a live notification — nothing is emailed or pushed anywhere automatically for a knowledge gap. One thing worth knowing:
 - **Ephemeral disk**: on a host like Render, `data/knowledge-gaps.jsonl` is wiped whenever a new deploy creates a fresh filesystem (not on sleep/wake, only on redeploys). Fine for a pilot; if gap history needs to survive redeploys long-term, move it to a small database or external store later.
-- **No email/Slack alerting yet** — deliberately deferred until there's a mail-sending account (SMTP credentials or a transactional email provider) to wire up; the log-and-review page needs no such setup and works immediately.
 
 ### Rep feedback (`/admin/feedback`)
 
 Every bot reply (including fallback/error answers) shows a 👍/👎 row. Clicking one POSTs `{question, answer, rating}` to `/api/feedback` (validated by `lib/feedbackLog.js`'s `validateFeedbackRequest`, same length-limited pattern as chat request validation) and appends it to `data/feedback.jsonl`. `/admin/feedback` (same basic-auth login) lists entries newest-first with a helpful/not-helpful count, so a 👎 on an answer the bot was actually confident about (as opposed to a `cannot_answer` the gap log already catches) still surfaces for review. The same ephemeral-disk caveat as the gap log applies.
+
+**Downvote email alerts.** A 👎 additionally triggers a real email, so a not-helpful answer gets seen without anyone having to check `/admin/feedback` proactively. This is entirely optional and env-var-gated: `lib/emailAlert.js`'s `isEmailAlertConfigured` requires `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, and `ALERT_EMAIL_TO` to all be set (see "Deploying to Render" above for the full list of related vars); if any are missing, `server.js` logs a startup warning and simply skips alerting — the feedback is still recorded normally either way. When configured, the email is sent via `nodemailer` (`server.js`'s `mailTransporter`) as fire-and-forget: `sendMail(...)` is never awaited before responding to the client, and a delivery failure (bad credentials, unreachable host) is only logged server-side, never surfaced to the rep or allowed to affect the recorded feedback. `ALERT_EMAIL_TO` is not hardcoded anywhere in the app — it's a required environment variable the operator sets per deployment.
 
 ### The four statuses
 
@@ -142,6 +144,11 @@ The streaming pipeline was also verified against a real end-to-end request: a th
    - `ANTHROPIC_API_KEY` — required.
    - `BASIC_AUTH_USER` and `BASIC_AUTH_PASS` — required for anything other than local testing. Pick a shared username/password for reps; without both set, the app runs with no access control at all.
    - `ANTHROPIC_MODEL` — optional, defaults to `claude-sonnet-4-5-20250929`. Set to `claude-haiku-4-5-20251001` for meaningfully lower cost — side-by-side testing on this knowledge base showed no quality drop on spec lookups, procedural walkthroughs, or the out-of-scope/source-conflict cases that matter most here.
+   - `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, `ALERT_EMAIL_TO` — optional, all four required together to enable downvote email alerts (see "Rep feedback" below). Without all four set, the app runs fine, just without alerting.
+   - `SMTP_PORT` — optional, defaults to `587`.
+   - `SMTP_SECURE` — optional, `"true"` for implicit TLS (typically port 465); defaults to `false`.
+   - `ALERT_EMAIL_FROM` — optional, falls back to `SMTP_USER` if unset.
+   - `APP_BASE_URL` — optional, e.g. `https://<name>.onrender.com`; when set, downvote alert emails include a clickable link to `/admin/feedback`.
 5. Deploy. Render gives you a `https://<name>.onrender.com` URL — that's what you'd share with reps (behind the basic-auth prompt their browser will show once).
 
 Free/starter Render tiers sleep after inactivity and take a few seconds to wake on the next request — fine for a pilot, worth upgrading if that latency becomes annoying.
