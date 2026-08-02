@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <meta name="color-scheme" content="light dark" />
 <title>JDHG Product Assistant</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231B3F73'/%3E%3Ctext x='32' y='43' font-family='Arial, sans-serif' font-size='26' font-weight='800' fill='white' text-anchor='middle'%3EJD%3C/text%3E%3C/svg%3E" />
+<link rel="icon" type="image/png" href="/assets/favicon.png" />
 <style>
   :root {
     --navy: #1B3F73;
@@ -112,14 +112,13 @@
     width: 34px;
     height: 34px;
     border-radius: 9px;
-    background: rgba(255,255,255,0.15);
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 13px;
     flex-shrink: 0;
   }
+  .brand-mark img { width: 20px; height: auto; display: block; }
   .title-row { display: flex; align-items: center; gap: 8px; }
   .header-title {
     font-weight: 700;
@@ -196,18 +195,11 @@
     margin: 0 auto;
   }
   .welcome-mark {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: var(--navy);
-    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 19px;
-    box-shadow: 0 10px 26px -8px rgba(27, 63, 115, 0.4);
   }
+  .welcome-mark img { width: 60px; height: auto; display: block; }
   .welcome-title { font-size: 16.5px; font-weight: 700; }
   .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.55; }
   .welcome-chips { display: flex; flex-direction: column; gap: 8px; width: 100%; }
@@ -254,16 +246,15 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: var(--navy);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
+    background: #fff;
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     margin-bottom: 2px;
   }
+  .avatar img { width: 18px; height: auto; display: block; }
 
   .bubble-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .row.user .bubble-col { align-items: flex-end; }
@@ -555,7 +546,7 @@
       <div id="app">
         <header>
           <div class="header-left">
-            <div class="brand-mark">JD</div>
+            <div class="brand-mark"><img src="/assets/brand-icon.png" alt="JD Healthcare Group" /></div>
             <div>
               <div class="title-row">
                 <span class="header-title">JDHG Product Assistant</span>
@@ -728,6 +719,20 @@
         .join(" ");
     }
 
+    function createBrandIcon() {
+      const img = document.createElement("img");
+      img.src = "/assets/brand-icon.png";
+      img.alt = "JD Healthcare Group";
+      return img;
+    }
+
+    function createAvatarEl() {
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+      avatar.appendChild(createBrandIcon());
+      return avatar;
+    }
+
     function autoResizeInput() {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 140) + "px";
@@ -745,7 +750,7 @@
 
       const mark = document.createElement("div");
       mark.className = "welcome-mark";
-      mark.textContent = "JD";
+      mark.appendChild(createBrandIcon());
       panel.appendChild(mark);
 
       const title = document.createElement("div");
@@ -831,10 +836,7 @@
       row.className = "row " + (cls === "user" ? "user" : "bot");
 
       if (cls !== "user") {
-        const avatar = document.createElement("div");
-        avatar.className = "avatar";
-        avatar.textContent = "JD";
-        row.appendChild(avatar);
+        row.appendChild(createAvatarEl());
       }
 
       const col = document.createElement("div");
@@ -860,10 +862,7 @@
       const wasNearBottom = isNearBottom();
       const row = document.createElement("div");
       row.className = "row bot typing-row";
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      avatar.textContent = "JD";
-      row.appendChild(avatar);
+      row.appendChild(createAvatarEl());
 
       const bubble = document.createElement("div");
       bubble.className = "msg bot";
@@ -885,10 +884,7 @@
       const wasNearBottom = isNearBottom();
       const row = document.createElement("div");
       row.className = "row bot";
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      avatar.textContent = "JD";
-      row.appendChild(avatar);
+      row.appendChild(createAvatarEl());
 
       const col = document.createElement("div");
       col.className = "bubble-col";
@@ -984,10 +980,7 @@
       const block = document.createElement("div");
       block.className = "bot-block";
 
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      avatar.textContent = "JD";
-      block.appendChild(avatar);
+      block.appendChild(createAvatarEl());
 
       const col = document.createElement("div");
       col.className = "card-col";
