@@ -246,8 +246,7 @@
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    background: #fff;
-    border: 1px solid var(--border);
+    background: var(--navy);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -719,9 +718,9 @@
         .join(" ");
     }
 
-    function createBrandIcon() {
+    function createBrandIcon(variant) {
       const img = document.createElement("img");
-      img.src = "/assets/brand-icon.png";
+      img.src = variant === "white" ? "/assets/brand-icon-white.png" : "/assets/brand-icon.png";
       img.alt = "JD Healthcare Group";
       return img;
     }
@@ -729,7 +728,7 @@
     function createAvatarEl() {
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-      avatar.appendChild(createBrandIcon());
+      avatar.appendChild(createBrandIcon("white"));
       return avatar;
     }
 

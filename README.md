@@ -108,7 +108,13 @@ The interface is a single, focused chat column — no permanent sidebar/quick-li
 
 ### Brand mark
 
-The header, welcome panel, chat avatars, and favicon all use the real JD Healthcare Group mark — the triangular icon only, no wordmark — instead of a placeholder "JD" text badge. `public/assets/brand-icon.png` (icon, transparent background) and `public/assets/favicon.png` (square-padded for the browser tab) were cropped from the supplied logo file; there's no source vector, so if the logo is ever updated, re-crop from the new file rather than hand-editing the PNGs. Everywhere the mark sits on a colored background (the navy header, the navy-bordered chat avatar) it gets a small white tile behind it, since the icon's own darkest triangle is close to the header's navy and would otherwise lose contrast; on the white welcome panel it's shown directly with no tile. `createBrandIcon()`/`createAvatarEl()` in `public/index.html` are the single place the image path and alt text are set, so all four call sites (welcome panel, and three chat-avatar contexts: message, typing indicator, streaming preview) stay in sync.
+The header, welcome panel, chat avatars, and favicon all use the real JD Healthcare Group mark — the triangular icon only, no wordmark — instead of a placeholder "JD" text badge. There's no source vector, so all variants are cropped/derived from the one supplied logo file; if the logo is ever updated, re-derive from the new file rather than hand-editing the PNGs. Two color variants exist because the icon's own darkest triangle is close to navy and needs to invert for contrast depending on what's behind it:
+
+- `public/assets/brand-icon.png` — full color (navy-to-blue gradient), transparent background. Used in the header (on a small white tile) and the welcome panel (directly on white, no tile).
+- `public/assets/brand-icon-white.png` — a white silhouette of the same icon (every opaque pixel recolored white, alpha preserved). Used in the chat avatar circles, which kept their original solid navy fill (`.avatar`) — a white tile there, like the header's, was tried and dropped in favor of "white logo on navy circle."
+- `public/assets/favicon.png` — full color, square-padded for the browser tab.
+
+`createBrandIcon(variant)` in `public/index.html` is the single place the image paths and alt text are set (`variant: "white"` for avatars, the default for everything else); `createAvatarEl()` builds on it for the three chat-avatar contexts (message, typing indicator, streaming preview).
 
 ## Interface polish
 
