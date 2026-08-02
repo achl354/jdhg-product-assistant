@@ -12,6 +12,8 @@
     --navy-dark: #142F57;
     --accent: #2563EB;
     --bg: #F1F4F9;
+    --canvas-1: #EEF1F7;
+    --canvas-2: #E3E9F4;
     --panel: #FFFFFF;
     --bubble-user: linear-gradient(135deg, #1B3F73, #2C5AA0);
     --border: #E2E5EA;
@@ -28,6 +30,8 @@
   @media (prefers-color-scheme: dark) {
     :root {
       --bg: #0F172A;
+      --canvas-1: #0B1220;
+      --canvas-2: #101B31;
       --panel: #1E293B;
       --border: #334155;
       --text: #E2E8F0;
@@ -46,7 +50,7 @@
     margin: 0;
     height: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    background: var(--bg);
+    background: linear-gradient(180deg, var(--canvas-2) 0%, var(--canvas-1) 55%);
     color: var(--text);
   }
   button, textarea { font-family: inherit; }
@@ -65,14 +69,31 @@
     white-space: nowrap;
     border: 0;
   }
+
+  /* ---- Shell: centers the app, and (>=1200px) seats the answer-detail rail
+     beside it. Below that width #rail simply doesn't render — sources/
+     related documents fall back to the inline card text, so mobile is
+     unaffected. ---- */
+  #shell {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+  .app-frame {
+    display: flex;
+    height: 100vh;
+    max-width: 100%;
+    box-shadow: 0 0 40px rgba(27, 63, 115, 0.08);
+  }
   #app {
+    width: 680px;
+    max-width: 100%;
+    min-width: 0;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    max-width: 760px;
-    margin: 0 auto;
     background: var(--panel);
-    box-shadow: 0 0 40px rgba(27, 63, 115, 0.08);
   }
 
   header {
@@ -99,9 +120,20 @@
     font-size: 13px;
     flex-shrink: 0;
   }
+  .title-row { display: flex; align-items: center; gap: 8px; }
   .header-title {
     font-weight: 700;
     font-size: 15.5px;
+  }
+  .pilot-pill {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.28);
+    padding: 2px 7px;
+    border-radius: 999px;
   }
   header .sub {
     font-size: 11.5px;
@@ -109,20 +141,32 @@
     opacity: 0.82;
     margin-top: 2px;
   }
-  #clearBtn {
+  .header-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #34D399;
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
+    flex-shrink: 0;
+  }
+  .icon-btn {
+    width: 32px;
+    height: 32px;
     background: rgba(255,255,255,0.12);
     border: 1px solid rgba(255,255,255,0.2);
     color: #fff;
-    padding: 7px 12px;
     border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    flex-shrink: 0;
     transition: background 0.15s ease, transform 0.1s ease;
   }
-  #clearBtn:hover { background: rgba(255,255,255,0.22); }
-  #clearBtn:active { transform: scale(0.96); }
+  .icon-btn:hover { background: rgba(255,255,255,0.22); }
+  .icon-btn:active { transform: scale(0.92); }
 
   #log {
     flex: 1;
@@ -138,11 +182,69 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ---- Welcome / empty state: shown only before the first message, in
+     place of the old greeting chat-bubble. ---- */
+  .welcome-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 16px;
+    max-width: 340px;
+    margin: 0 auto;
+  }
+  .welcome-mark {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 19px;
+    box-shadow: 0 10px 26px -8px rgba(27, 63, 115, 0.4);
+  }
+  .welcome-title { font-size: 16.5px; font-weight: 700; }
+  .welcome-sub { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .welcome-chips { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .welcome-chip {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 13px;
+    font-size: 13px;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .welcome-chip:hover { border-color: var(--accent); background: var(--customer-bg); }
+  .welcome-chip .qmark {
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background: var(--customer-bg);
+    color: var(--customer-accent);
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
   .row {
     display: flex;
     align-items: flex-end;
     gap: 8px;
-    max-width: 88%;
+    max-width: 90%;
     animation: fadeInUp 0.18s ease;
   }
   .row.user { align-self: flex-end; flex-direction: row-reverse; }
@@ -211,14 +313,30 @@
     font-size: 12.5px;
   }
 
+  /* ---- Unified response card: badge/answer, customer-ready wording,
+     sources/related, and feedback are sections of one bordered card
+     rather than loosely stacked elements. ---- */
   .bot-block {
-    max-width: 88%;
+    max-width: 92%;
     align-self: flex-start;
     display: flex;
-    flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
     animation: fadeInUp 0.2s ease;
   }
+  .card-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1; }
+  .response-card {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--panel);
+    overflow: hidden;
+  }
+  .card-sec { padding: 12px 14px; }
+  .card-sec + .card-sec { border-top: 1px solid var(--border); }
+  .card-sec.customer { background: var(--customer-bg); color: var(--customer-fg); }
+  .card-sec.meta { display: flex; flex-direction: column; gap: 4px; }
+  .card-sec.feedback-sec { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
   .status-badge {
     display: inline-block;
     font-size: 10.5px;
@@ -236,17 +354,6 @@
   .sources-line {
     font-size: 11px;
     color: var(--muted);
-    padding-left: 4px;
-  }
-  .customer-ready-box {
-    border-radius: 10px;
-    padding: 12px 14px;
-    font-size: 13.5px;
-    line-height: 1.6;
-    background: var(--customer-bg);
-    border: 1px solid var(--customer-border);
-    border-left: 3px solid var(--customer-accent);
-    color: var(--customer-fg);
   }
   .reference-line {
     margin-top: 8px;
@@ -270,7 +377,7 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
-  .customer-ready-box .label { color: var(--customer-accent); }
+  .card-sec.customer .label { color: var(--customer-accent); }
   .copy-btn {
     background: var(--panel);
     border: 1px solid var(--customer-border);
@@ -287,14 +394,12 @@
   .related-docs {
     font-size: 11px;
     color: var(--muted);
-    padding-left: 4px;
   }
 
   .feedback-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0 4px;
   }
   .feedback-btn {
     background: transparent;
@@ -312,6 +417,7 @@
   .feedback-btn.selected { border-color: var(--accent); color: var(--accent); }
   .feedback-btn:disabled { cursor: default; opacity: 0.6; }
   .feedback-note { font-size: 11px; color: var(--muted); }
+  .fb-hint { display: none; font-size: 11px; color: var(--muted); }
 
   .typing-row .msg.bot {
     display: flex;
@@ -374,30 +480,114 @@
   #send:active:not(:disabled) { transform: scale(0.96); }
   #send:disabled { opacity: 0.5; cursor: default; }
 
+  .composer-hint {
+    background: var(--panel);
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 16px 12px;
+    flex-shrink: 0;
+  }
+
+  /* ---- Answer-detail rail: desktop-only convenience mirroring the latest
+     reply's sources and related documents. Never the only place this
+     information lives — the response card above always has it too. ---- */
+  #rail { display: none; }
+  @media (min-width: 1200px) {
+    #rail {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      padding: 22px 18px;
+      overflow-y: auto;
+    }
+    .fb-hint { display: inline; }
+  }
+  .rail-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .rail-block { display: flex; flex-direction: column; }
+  .rail-src {
+    font-size: 12px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    word-break: break-word;
+  }
+  .rail-follow {
+    display: block;
+    width: 100%;
+    text-align: left;
+    font-size: 12px;
+    color: var(--customer-accent);
+    background: var(--customer-bg);
+    border: 1px solid var(--customer-border);
+    border-radius: 8px;
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .rail-follow:hover { background: var(--customer-border); }
+  .rail-empty { font-size: 11.5px; color: var(--muted); font-style: italic; }
+
   @media (max-width: 780px) {
-    #app { max-width: none; box-shadow: none; }
+    .app-frame { box-shadow: none; }
     .row, .bot-block { max-width: 96%; }
   }
 </style>
 </head>
 <body>
-  <div id="app">
-    <header>
-      <div class="header-left">
-        <div class="brand-mark">JD</div>
-        <div>
-          <div class="header-title">JDHG Product Assistant</div>
-          <div class="sub">Pilot &middot; answers only from a curated knowledge base</div>
+  <div id="shell">
+    <div class="app-frame">
+      <div id="app">
+        <header>
+          <div class="header-left">
+            <div class="brand-mark">JD</div>
+            <div>
+              <div class="title-row">
+                <span class="header-title">JDHG Product Assistant</span>
+                <span class="pilot-pill">Pilot</span>
+              </div>
+              <div class="sub">Grounded only in the curated knowledge base</div>
+            </div>
+          </div>
+          <div class="header-right">
+            <span class="status-dot" title="Session ready" aria-hidden="true"></span>
+            <button id="clearBtn" type="button" class="icon-btn" aria-label="Clear conversation" title="Clear conversation">&#8635;</button>
+          </div>
+        </header>
+        <div id="log" role="log" aria-label="Conversation"></div>
+        <div id="srAnnouncer" class="sr-only" aria-live="polite"></div>
+        <form id="form">
+          <textarea id="input" rows="1" placeholder="Ask about any JDHG product... (Enter to send, Shift+Enter for a new line)" autocomplete="off"></textarea>
+          <button id="send" type="submit">Send</button>
+        </form>
+        <div class="composer-hint">Answers are grounded only in JDHG's curated knowledge base.</div>
+      </div>
+      <div id="rail" role="complementary" aria-label="Answer details">
+        <div class="rail-block">
+          <div class="rail-label">Sources</div>
+          <div id="railSources"></div>
+        </div>
+        <div class="rail-block">
+          <div class="rail-label">Ask next</div>
+          <div id="railRelated"></div>
         </div>
       </div>
-      <button id="clearBtn" type="button">Clear</button>
-    </header>
-    <div id="log" role="log" aria-label="Conversation"></div>
-    <div id="srAnnouncer" class="sr-only" aria-live="polite"></div>
-    <form id="form">
-      <textarea id="input" rows="1" placeholder="Ask about any JDHG product... (Enter to send, Shift+Enter for a new line)" autocomplete="off"></textarea>
-      <button id="send" type="submit">Send</button>
-    </form>
+    </div>
   </div>
 
   <script>
@@ -407,6 +597,8 @@
     const input = document.getElementById("input");
     const send = document.getElementById("send");
     const clearBtn = document.getElementById("clearBtn");
+    const railSourcesEl = document.getElementById("railSources");
+    const railRelatedEl = document.getElementById("railRelated");
 
     const STORAGE_KEY = "jdhg-chat-state-v1";
     const SCROLL_NEAR_BOTTOM_PX = 80;
@@ -421,7 +613,12 @@
       cannot_answer: "Cannot answer"
     };
 
-    const GREETING = "Hi, I'm the JDHG Product Assistant pilot. Ask me about specs, ARTG/GMDN details, usage steps, or warnings for any product in the range.";
+    const EXAMPLE_PROMPTS = [
+      "What's the ARTG number for EasiMove SPU?",
+      "How does EasiLift compare to EasiMove PRO?",
+      "What's HoverTech's maximum safe working load?",
+      "Walk me through EasiAir's setup steps"
+    ];
 
     function timeNow() {
       return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -519,9 +716,112 @@
       return renderMarkdown(body) + `<div class="reference-line">${inlineFormat(escapeHtml(reference.trim()))}</div>`;
     }
 
+    // Turns a knowledge document ID (e.g. "marketing/easilift.md") into a
+    // short human-readable label for the rail — display only, purely
+    // cosmetic, never used as a source of truth for anything.
+    function friendlyLabel(docId) {
+      const base = String(docId).replace(/^marketing\//, "").replace(/\.md$/i, "");
+      return base
+        .split(/[-_]/)
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+    }
+
     function autoResizeInput() {
       input.style.height = "auto";
       input.style.height = Math.min(input.scrollHeight, 140) + "px";
+    }
+
+    function fillComposer(text) {
+      input.value = text;
+      autoResizeInput();
+      input.focus();
+    }
+
+    function renderWelcome() {
+      const panel = document.createElement("div");
+      panel.className = "welcome-panel";
+
+      const mark = document.createElement("div");
+      mark.className = "welcome-mark";
+      mark.textContent = "JD";
+      panel.appendChild(mark);
+
+      const title = document.createElement("div");
+      title.className = "welcome-title";
+      title.textContent = "Ask about any product in the range";
+      panel.appendChild(title);
+
+      const sub = document.createElement("div");
+      sub.className = "welcome-sub";
+      sub.textContent = "Specs, ARTG/GMDN details, usage steps, or warnings — answered only from JDHG's curated knowledge base.";
+      panel.appendChild(sub);
+
+      const chips = document.createElement("div");
+      chips.className = "welcome-chips";
+      for (const prompt of EXAMPLE_PROMPTS) {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "welcome-chip";
+        const qmark = document.createElement("span");
+        qmark.className = "qmark";
+        qmark.textContent = "?";
+        chip.appendChild(qmark);
+        const label = document.createElement("span");
+        label.textContent = prompt;
+        chip.appendChild(label);
+        chip.addEventListener("click", () => fillComposer(prompt));
+        chips.appendChild(chip);
+      }
+      panel.appendChild(chips);
+
+      log.appendChild(panel);
+    }
+
+    function clearWelcomeIfPresent() {
+      const panel = log.querySelector(".welcome-panel");
+      if (panel) panel.remove();
+    }
+
+    function resetRail() {
+      railSourcesEl.innerHTML = '<div class="rail-empty">Ask a question to see its sources here.</div>';
+      railRelatedEl.innerHTML = '<div class="rail-empty">Related documents will appear after a reply.</div>';
+    }
+
+    // Mirrors the latest reply's sources/related documents in the rail —
+    // a desktop-only convenience. The response card itself always shows the
+    // same information inline, so this is never the only place it lives.
+    function updateRail(data) {
+      const sources = Array.isArray(data.sources) ? data.sources : [];
+      const related = Array.isArray(data.related_documents) ? data.related_documents : [];
+
+      railSourcesEl.innerHTML = "";
+      if (!sources.length) {
+        railSourcesEl.innerHTML = '<div class="rail-empty">No sources for this reply.</div>';
+      } else {
+        for (const id of sources) {
+          const row = document.createElement("div");
+          row.className = "rail-src";
+          row.textContent = friendlyLabel(id);
+          railSourcesEl.appendChild(row);
+        }
+      }
+
+      railRelatedEl.innerHTML = "";
+      if (!related.length) {
+        railRelatedEl.innerHTML = '<div class="rail-empty">No related documents flagged.</div>';
+      } else {
+        for (const id of related) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "rail-follow";
+          const label = friendlyLabel(id);
+          btn.textContent = "Ask about " + label;
+          btn.addEventListener("click", () => fillComposer("Tell me more about " + label + "."));
+          railRelatedEl.appendChild(btn);
+        }
+      }
     }
 
     function addSimpleMessage(text, cls, presetTime) {
@@ -684,46 +984,32 @@
       const block = document.createElement("div");
       block.className = "bot-block";
 
-      const row = document.createElement("div");
-      row.className = "row bot";
       const avatar = document.createElement("div");
       avatar.className = "avatar";
       avatar.textContent = "JD";
-      row.appendChild(avatar);
+      block.appendChild(avatar);
 
       const col = document.createElement("div");
-      col.className = "bubble-col";
+      col.className = "card-col";
 
-      const answer = document.createElement("div");
-      answer.className = "msg bot";
+      const card = document.createElement("div");
+      card.className = "response-card";
+
+      const mainSec = document.createElement("div");
+      mainSec.className = "card-sec";
       const badge = document.createElement("span");
       badge.className = "status-badge status-" + (data.status || "cannot_answer");
       badge.textContent = STATUS_LABELS[data.status] || data.status || "Unknown";
-      answer.appendChild(badge);
+      mainSec.appendChild(badge);
       const content = document.createElement("div");
       content.className = "md-content";
       content.innerHTML = renderMarkdown(data.answer || "");
-      answer.appendChild(content);
-      col.appendChild(answer);
-
-      const ts = document.createElement("div");
-      ts.className = "timestamp";
-      ts.textContent = presetTime || timeNow();
-      col.appendChild(ts);
-
-      row.appendChild(col);
-      block.appendChild(row);
-
-      if (Array.isArray(data.sources) && data.sources.length) {
-        const sourcesLine = document.createElement("div");
-        sourcesLine.className = "sources-line";
-        sourcesLine.textContent = "Sources: " + data.sources.join(", ");
-        block.appendChild(sourcesLine);
-      }
+      mainSec.appendChild(content);
+      card.appendChild(mainSec);
 
       if (data.customer_ready) {
-        const box = document.createElement("div");
-        box.className = "customer-ready-box";
+        const custSec = document.createElement("div");
+        custSec.className = "card-sec customer";
         const head = document.createElement("div");
         head.className = "box-head";
         const label = document.createElement("span");
@@ -736,26 +1022,55 @@
         copyBtn.textContent = "Copy";
         copyBtn.addEventListener("click", () => copyToClipboard(data.customer_ready, copyBtn));
         head.appendChild(copyBtn);
-        box.appendChild(head);
-        const content2 = document.createElement("div");
-        content2.className = "md-content";
-        content2.innerHTML = renderCustomerReady(data.customer_ready);
-        box.appendChild(content2);
-        block.appendChild(box);
+        custSec.appendChild(head);
+        const custContent = document.createElement("div");
+        custContent.className = "md-content";
+        custContent.innerHTML = renderCustomerReady(data.customer_ready);
+        custSec.appendChild(custContent);
+        card.appendChild(custSec);
       }
 
-      if (Array.isArray(data.related_documents) && data.related_documents.length) {
-        const related = document.createElement("div");
-        related.className = "related-docs";
-        related.textContent = "Related: " + data.related_documents.join(", ");
-        block.appendChild(related);
+      const hasSources = Array.isArray(data.sources) && data.sources.length;
+      const hasRelated = Array.isArray(data.related_documents) && data.related_documents.length;
+      if (hasSources || hasRelated) {
+        const metaSec = document.createElement("div");
+        metaSec.className = "card-sec meta";
+        if (hasSources) {
+          const sourcesLine = document.createElement("div");
+          sourcesLine.className = "sources-line";
+          sourcesLine.textContent = "Sources: " + data.sources.join(", ");
+          metaSec.appendChild(sourcesLine);
+        }
+        if (hasRelated) {
+          const related = document.createElement("div");
+          related.className = "related-docs";
+          related.textContent = "Related: " + data.related_documents.join(", ");
+          metaSec.appendChild(related);
+        }
+        card.appendChild(metaSec);
       }
 
-      block.appendChild(addFeedbackRow(question || "", data.answer || ""));
+      const fbSec = document.createElement("div");
+      fbSec.className = "card-sec feedback-sec";
+      fbSec.appendChild(addFeedbackRow(question || "", data.answer || ""));
+      const fbHint = document.createElement("span");
+      fbHint.className = "fb-hint";
+      fbHint.textContent = "More detail in the panel →";
+      fbSec.appendChild(fbHint);
+      card.appendChild(fbSec);
 
+      col.appendChild(card);
+
+      const ts = document.createElement("div");
+      ts.className = "timestamp";
+      ts.textContent = presetTime || timeNow();
+      col.appendChild(ts);
+
+      block.appendChild(col);
       log.appendChild(block);
       if (wasNearBottom) log.scrollTop = log.scrollHeight;
       srAnnouncer.textContent = "Assistant replied.";
+      updateRail(data);
       return block;
     }
 
@@ -763,9 +1078,8 @@
       history = [];
       displayLog = [];
       log.innerHTML = "";
-      const time = timeNow();
-      addSimpleMessage(GREETING, "bot", time);
-      displayLog.push({ type: "bot-simple", text: GREETING, time });
+      renderWelcome();
+      resetRail();
       saveState();
     }
 
@@ -773,9 +1087,13 @@
       history = saved.history;
       displayLog = saved.displayLog;
       log.innerHTML = "";
+      resetRail();
       for (const entry of saved.displayLog) {
         if (entry.type === "user") addSimpleMessage(entry.text, "user", entry.time);
         else if (entry.type === "error") addSimpleMessage(entry.text, "error", entry.time);
+        // "bot-simple" is kept only for backward compatibility with a
+        // conversation saved before the welcome-state rework — it's never
+        // written by resetConversation() any more.
         else if (entry.type === "bot-simple") addSimpleMessage(entry.text, "bot", entry.time);
         else if (entry.type === "bot-block") addBotBlock(entry.data, entry.question, entry.time);
       }
@@ -802,6 +1120,8 @@
       e.preventDefault();
       const message = input.value.trim();
       if (!message) return;
+
+      clearWelcomeIfPresent();
 
       const userTime = timeNow();
       addSimpleMessage(message, "user", userTime);
