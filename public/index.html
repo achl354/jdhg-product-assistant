@@ -2,6 +2,19 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
+<script>
+  // Applied before first paint so a saved manual theme choice never flashes
+  // the system-default theme first. The click handler that writes this key
+  // lives in the main script at the bottom of the page.
+  (function () {
+    try {
+      var saved = localStorage.getItem("jdhg-theme-preference");
+      if (saved === "dark" || saved === "light") {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
+    } catch (err) { /* localStorage unavailable — falls back to system preference */ }
+  })();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <meta name="color-scheme" content="light dark" />
 <title>Sales Assistant</title>
@@ -52,6 +65,46 @@
       --error-bg: #3F1616; --error-border: #7F1D1D; --error-fg: #FCA5A5;
       --customer-bg: #0F2942; --customer-border: #1E4976; --customer-fg: #BFDBFE; --customer-accent: #3B82F6;
     }
+  }
+  /* Manual theme toggle: these two blocks mirror the light :root defaults
+     and the dark media-query block above, so a saved choice overrides the
+     system preference in either direction. An attribute selector always
+     beats a plain :root selector, so these win regardless of source order. */
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0F172A;
+    --canvas-1: #0B1220;
+    --canvas-2: #101B31;
+    --panel: #1E293B;
+    --bubble-user: #52525B;
+    --border: #334155;
+    --text: #E2E8F0;
+    --muted: #94A3B8;
+    --code-bg: #0B1220;
+    --status-confirmed-bg: #14532D; --status-confirmed-fg: #86EFAC;
+    --status-supported-bg: #1E3A5F; --status-supported-fg: #93C5FD;
+    --status-needs-bg: #422006; --status-needs-fg: #FCD34D;
+    --status-cannot-bg: #334155; --status-cannot-fg: #CBD5E1;
+    --error-bg: #3F1616; --error-border: #7F1D1D; --error-fg: #FCA5A5;
+    --customer-bg: #0F2942; --customer-border: #1E4976; --customer-fg: #BFDBFE; --customer-accent: #3B82F6;
+  }
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --bg: #F1F4F9;
+    --canvas-1: #EEF1F7;
+    --canvas-2: #E3E9F4;
+    --panel: #FFFFFF;
+    --bubble-user: #404040;
+    --border: #E2E5EA;
+    --text: #1F2937;
+    --muted: #6B7280;
+    --code-bg: #F1F4F9;
+    --status-confirmed-bg: #DCFCE7; --status-confirmed-fg: #166534;
+    --status-supported-bg: #DBEAFE; --status-supported-fg: #1E40AF;
+    --status-needs-bg: #FEF3C7; --status-needs-fg: #92400E;
+    --status-cannot-bg: #F3F4F6; --status-cannot-fg: #4B5563;
+    --error-bg: #FEF2F2; --error-border: #FCA5A5; --error-fg: #991B1B;
+    --customer-bg: #EFF6FF; --customer-border: #BFDBFE; --customer-fg: #1E3A8A; --customer-accent: #2563EB;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -165,6 +218,21 @@
   }
   .icon-btn:hover { background: rgba(255,255,255,0.22); }
   .icon-btn:active { transform: scale(0.92); }
+
+  /* Theme toggle: both icons always in the DOM, CSS shows only the one
+     matching the active theme — no JS icon-swapping needed. Default (no
+     saved preference) follows system dark/light; a saved data-theme
+     attribute always wins, in either direction. */
+  .theme-icon { width: 16px; height: 16px; display: block; }
+  .theme-icon.moon-icon { display: none; }
+  @media (prefers-color-scheme: dark) {
+    .theme-icon.sun-icon { display: none; }
+    .theme-icon.moon-icon { display: block; }
+  }
+  :root[data-theme="dark"] .theme-icon.sun-icon { display: none; }
+  :root[data-theme="dark"] .theme-icon.moon-icon { display: block; }
+  :root[data-theme="light"] .theme-icon.sun-icon { display: block; }
+  :root[data-theme="light"] .theme-icon.moon-icon { display: none; }
 
   #log {
     flex: 1;
@@ -554,6 +622,22 @@
           </div>
           <div class="header-right">
             <span class="status-dot" title="Session ready" aria-hidden="true"></span>
+            <button id="themeToggle" type="button" class="icon-btn" aria-label="Toggle dark mode" title="Toggle dark mode">
+              <svg class="theme-icon sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="12" y1="2" x2="12" y2="4.5"></line>
+                <line x1="12" y1="19.5" x2="12" y2="22"></line>
+                <line x1="4.5" y1="4.5" x2="6.2" y2="6.2"></line>
+                <line x1="17.8" y1="17.8" x2="19.5" y2="19.5"></line>
+                <line x1="2" y1="12" x2="4.5" y2="12"></line>
+                <line x1="19.5" y1="12" x2="22" y2="12"></line>
+                <line x1="4.5" y1="19.5" x2="6.2" y2="17.8"></line>
+                <line x1="17.8" y1="6.2" x2="19.5" y2="4.5"></line>
+              </svg>
+              <svg class="theme-icon moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path>
+              </svg>
+            </button>
             <button id="clearBtn" type="button" class="icon-btn" aria-label="Clear conversation" title="Clear conversation">&#8635;</button>
           </div>
         </header>
@@ -584,10 +668,12 @@
     const input = document.getElementById("input");
     const send = document.getElementById("send");
     const clearBtn = document.getElementById("clearBtn");
+    const themeToggle = document.getElementById("themeToggle");
     const railSourcesEl = document.getElementById("railSources");
     const railRelatedEl = document.getElementById("railRelated");
 
     const STORAGE_KEY = "jdhg-chat-state-v1";
+    const THEME_STORAGE_KEY = "jdhg-theme-preference";
     const SCROLL_NEAR_BOTTOM_PX = 80;
 
     let history = [];
@@ -1095,6 +1181,21 @@
     }
 
     clearBtn.addEventListener("click", resetConversation);
+
+    // Manual theme toggle. Absence of data-theme means "follow system" —
+    // toggling always sets an explicit choice from here on. The early
+    // inline script in <head> applies any saved choice before first paint.
+    themeToggle.addEventListener("click", () => {
+      const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const current = document.documentElement.getAttribute("data-theme") || (systemPrefersDark ? "dark" : "light");
+      const next = current === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", next);
+      try {
+        localStorage.setItem(THEME_STORAGE_KEY, next);
+      } catch (err) {
+        /* storage unavailable — the toggle still works for this page view */
+      }
+    });
 
     input.addEventListener("input", autoResizeInput);
     input.addEventListener("keydown", (e) => {
