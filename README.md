@@ -110,9 +110,10 @@ The interface is a single, focused chat column — no permanent sidebar/quick-li
 
 ### Brand mark
 
-The header, welcome panel, and favicon use the real JD Healthcare Group mark instead of a placeholder "JD" text badge; chat avatars deliberately kept plain "JD" text on a navy circle (a white-icon-on-navy treatment was tried there and reverted — it read as busier than the simple monogram at that small size). There's no source vector, so both image variants are cropped/derived from the one supplied logo file; if the logo is ever updated, re-derive from the new file rather than hand-editing the PNGs.
+The header, welcome panel, and favicon use the real JD Healthcare Group mark instead of a placeholder "JD" text badge. Chat avatars are theme-conditional: plain "JD" text on a navy circle in light mode (a white-icon-on-navy treatment was tried there once and reverted for reading as busier than the simple monogram at that small size), but the white icon in dark mode, where the request was specifically to bring the logo back for that theme. There's no source vector, so both image variants are cropped/derived from the one supplied logo file; if the logo is ever updated, re-derive from the new file rather than hand-editing the PNGs.
 
 - `public/assets/brand-icon.png` — full color icon only (no wordmark), transparent background. Used in the welcome panel, directly on white, no backdrop.
+- `public/assets/brand-icon-white.png` — a white silhouette of the icon only (every opaque pixel recolored white, alpha preserved). Used only in dark-mode chat avatars (`.avatar-icon`) — light mode keeps plain "JD" text (`.avatar-text`). Both elements are always in the DOM; which one is visible is pure CSS, the same default/media-query/explicit-`data-theme` pattern used for the theme-toggle sun/moon icons, so switching themes updates the avatar immediately with no JS.
 - `public/assets/logo-full-white.png` — the *entire* logo (icon + "JD HEALTHCARE Group" wordmark), recolored solid white. Used in the header, directly on the navy gradient background — no tile needed since the mark itself is already white.
 - `public/assets/favicon.png` — full color icon only, square-padded for the browser tab.
 

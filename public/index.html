@@ -323,6 +323,19 @@
     flex-shrink: 0;
     margin-bottom: 2px;
   }
+  /* "JD" in light mode, the white logo icon in dark mode — both always in
+     the DOM, CSS picks one per the same three-state pattern as the theme
+     toggle (default/media-query/explicit data-theme), so switching themes
+     updates the avatar immediately without any JS. */
+  .avatar-icon { display: none; width: 16px; height: auto; }
+  @media (prefers-color-scheme: dark) {
+    .avatar-text { display: none; }
+    .avatar-icon { display: block; }
+  }
+  :root[data-theme="dark"] .avatar-text { display: none; }
+  :root[data-theme="dark"] .avatar-icon { display: block; }
+  :root[data-theme="light"] .avatar-text { display: inline; }
+  :root[data-theme="light"] .avatar-icon { display: none; }
 
   .bubble-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .row.user .bubble-col { align-items: flex-end; }
@@ -810,7 +823,18 @@
     function createAvatarEl() {
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-      avatar.textContent = "JD";
+
+      const text = document.createElement("span");
+      text.className = "avatar-text";
+      text.textContent = "JD";
+      avatar.appendChild(text);
+
+      const icon = document.createElement("img");
+      icon.className = "avatar-icon";
+      icon.src = "/assets/brand-icon-white.png";
+      icon.alt = "JD Healthcare Group";
+      avatar.appendChild(icon);
+
       return avatar;
     }
 
