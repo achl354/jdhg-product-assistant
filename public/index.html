@@ -200,6 +200,7 @@
     background: #34D399;
     box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.25);
     flex-shrink: 0;
+    margin-right: 6px;
   }
   .icon-btn {
     width: 32px;
@@ -208,7 +209,7 @@
     border: 1px solid rgba(255,255,255,0.2);
     color: #fff;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1;
     display: flex;
     align-items: center;
@@ -323,19 +324,6 @@
     flex-shrink: 0;
     margin-bottom: 2px;
   }
-  /* "JD" in light mode, the white logo icon in dark mode — both always in
-     the DOM, CSS picks one per the same three-state pattern as the theme
-     toggle (default/media-query/explicit data-theme), so switching themes
-     updates the avatar immediately without any JS. */
-  .avatar-icon { display: none; width: 16px; height: auto; }
-  @media (prefers-color-scheme: dark) {
-    .avatar-text { display: none; }
-    .avatar-icon { display: block; }
-  }
-  :root[data-theme="dark"] .avatar-text { display: none; }
-  :root[data-theme="dark"] .avatar-icon { display: block; }
-  :root[data-theme="light"] .avatar-text { display: inline; }
-  :root[data-theme="light"] .avatar-icon { display: none; }
 
   .bubble-col { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .row.user .bubble-col { align-items: flex-end; }
@@ -616,7 +604,7 @@
     .app-name { font-size: 11.5px; }
     .pilot-pill { font-size: 8px; padding: 1px 6px; }
     .header-right { gap: 8px; }
-    .icon-btn { width: 28px; height: 28px; font-size: 13px; }
+    .icon-btn { width: 28px; height: 28px; font-size: 15px; }
     .status-dot { width: 6px; height: 6px; }
   }
 </style>
@@ -823,18 +811,7 @@
     function createAvatarEl() {
       const avatar = document.createElement("div");
       avatar.className = "avatar";
-
-      const text = document.createElement("span");
-      text.className = "avatar-text";
-      text.textContent = "JD";
-      avatar.appendChild(text);
-
-      const icon = document.createElement("img");
-      icon.className = "avatar-icon";
-      icon.src = "/assets/brand-icon-white.png";
-      icon.alt = "JD Healthcare Group";
-      avatar.appendChild(icon);
-
+      avatar.textContent = "JD";
       return avatar;
     }
 
