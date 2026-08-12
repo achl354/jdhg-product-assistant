@@ -46,6 +46,7 @@
     --status-cannot-bg: #F3F4F6; --status-cannot-fg: #4B5563;
     --error-bg: #FEF2F2; --error-border: #FCA5A5; --error-fg: #991B1B;
     --customer-bg: #EFF6FF; --customer-border: #BFDBFE; --customer-fg: #1E3A8A; --customer-accent: #2563EB;
+    --doclink-bg: #ECFAF8; --doclink-border: #B7E8E0; --doclink-fg: #0F6F66; --doclink-accent: #0D9488; --doclink-chip-hover: #DFF5F1;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -64,6 +65,7 @@
       --status-cannot-bg: #334155; --status-cannot-fg: #CBD5E1;
       --error-bg: #3F1616; --error-border: #7F1D1D; --error-fg: #FCA5A5;
       --customer-bg: #0F2942; --customer-border: #1E4976; --customer-fg: #BFDBFE; --customer-accent: #3B82F6;
+      --doclink-bg: #0B2723; --doclink-border: #175249; --doclink-fg: #6EE7DB; --doclink-accent: #2DD4C0; --doclink-chip-hover: #103A33;
     }
   }
   /* Manual theme toggle: these two blocks mirror the light :root defaults
@@ -87,6 +89,7 @@
     --status-cannot-bg: #334155; --status-cannot-fg: #CBD5E1;
     --error-bg: #3F1616; --error-border: #7F1D1D; --error-fg: #FCA5A5;
     --customer-bg: #0F2942; --customer-border: #1E4976; --customer-fg: #BFDBFE; --customer-accent: #3B82F6;
+    --doclink-bg: #0B2723; --doclink-border: #175249; --doclink-fg: #6EE7DB; --doclink-accent: #2DD4C0; --doclink-chip-hover: #103A33;
   }
   :root[data-theme="light"] {
     color-scheme: light;
@@ -105,6 +108,7 @@
     --status-cannot-bg: #F3F4F6; --status-cannot-fg: #4B5563;
     --error-bg: #FEF2F2; --error-border: #FCA5A5; --error-fg: #991B1B;
     --customer-bg: #EFF6FF; --customer-border: #BFDBFE; --customer-fg: #1E3A8A; --customer-accent: #2563EB;
+    --doclink-bg: #ECFAF8; --doclink-border: #B7E8E0; --doclink-fg: #0F6F66; --doclink-accent: #0D9488; --doclink-chip-hover: #DFF5F1;
   }
   * { box-sizing: border-box; }
   html, body {
@@ -456,27 +460,80 @@
     color: var(--muted);
   }
   /* Server-attached, verified links (see lib/documentLinks.js) — never
-     model-generated. Rendered as a small indented list under the sources/
-     related lines rather than woven into them, so it's obvious these are
-     real clickable references, not just document names. */
-  .doc-links {
-    margin-top: 4px;
+     model-generated. Given its own tinted card section (teal, distinct from
+     the blue customer-ready box and the green "confirmed" status badge) so
+     a real, clickable document is unmistakably its own kind of thing, not
+     just more muted meta text next to "Sources: ...". */
+  .card-sec.doclinks { background: var(--doclink-bg); }
+  .card-sec.doclinks .label { color: var(--doclink-fg); }
+  .doclinks-head-icon,
+  .doclink-chip-icon,
+  .doclink-chip-arrow,
+  .rail-doclink-icon {
+    display: inline-block;
+  }
+  .doclinks-head-icon svg,
+  .doclink-chip-icon svg,
+  .doclink-chip-arrow svg,
+  .rail-doclink-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  .doclinks-head-icon {
+    width: 13px;
+    height: 13px;
+    vertical-align: -2px;
+    margin-right: 3px;
+    color: var(--doclink-accent);
+  }
+  .doclink-groups {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 14px;
   }
-  .doc-links-row {
-    font-size: 11px;
+  .doclink-group-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .doclink-group .doclink-chip + .doclink-chip { margin-top: 6px; }
+  .doclink-chip {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px 8px;
-  }
-  .doc-links-label { color: var(--muted); }
-  .doc-link {
-    color: var(--customer-accent);
+    align-items: center;
+    gap: 9px;
+    background: var(--panel);
+    border: 1px solid var(--doclink-border);
+    border-radius: 9px;
+    padding: 8px 11px;
     text-decoration: none;
+    color: inherit;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   }
-  .doc-link:hover { text-decoration: underline; }
+  .doclink-chip:hover { background: var(--doclink-chip-hover); border-color: var(--doclink-accent); }
+  .doclink-chip:active { transform: scale(0.99); }
+  .doclink-chip-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--doclink-accent);
+  }
+  .doclink-chip-file {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .doclink-chip-arrow {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: var(--doclink-accent);
+  }
 
   .feedback-row {
     display: flex;
@@ -599,18 +656,31 @@
     margin-bottom: 6px;
     word-break: break-word;
     display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 6px;
   }
+  .rail-src-label { display: flex; align-items: center; gap: 5px; }
   /* A server-verified link (see lib/documentLinks.js) attached to a rail
-     source row — never model-generated. */
-  .rail-src-link {
-    color: var(--customer-accent);
+     source row — never model-generated. A full-width teal button (not just
+     inline text) so a real, clickable document reads as unmistakably
+     actionable, distinct from the plain source label above it. */
+  .rail-doclink {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--doclink-fg);
+    background: var(--doclink-bg);
+    border: 1px solid var(--doclink-border);
+    border-radius: 7px;
+    padding: 6px 8px;
     text-decoration: none;
     font-size: 11px;
+    font-weight: 600;
+    transition: background 0.15s ease, border-color 0.15s ease;
   }
-  .rail-src-link:hover { text-decoration: underline; }
+  .rail-doclink:hover { background: var(--doclink-chip-hover); border-color: var(--doclink-accent); }
+  .rail-doclink-icon { flex-shrink: 0; width: 12px; height: 12px; color: var(--doclink-accent); }
+  .rail-doclink-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .rail-follow {
     display: block;
     width: 100%;
@@ -924,39 +994,131 @@
       return map;
     }
 
-    // Renders data.document_links (see lib/documentLinks.js) as a small list
-    // of real, clickable references under the response card's sources/
-    // related lines — one row per cited document that has a verified link
-    // on file. Returns null (nothing to append) when there's nothing to
-    // show, so callers never have to special-case an empty section.
-    function buildDocumentLinksEl(documentLinks) {
-      if (!Array.isArray(documentLinks) || !documentLinks.length) return null;
-      const wrap = document.createElement("div");
-      wrap.className = "doc-links";
-      for (const entry of documentLinks) {
-        if (!entry || !Array.isArray(entry.links) || !entry.links.length) continue;
-        const row = document.createElement("div");
-        row.className = "doc-links-row";
-        const label = document.createElement("span");
-        label.className = "doc-links-label";
-        label.textContent = friendlyLabel(entry.docId) + ":";
-        row.appendChild(label);
-        for (const link of entry.links) {
-          row.appendChild(createDocLinkAnchor(link, "doc-link"));
-        }
-        wrap.appendChild(row);
-      }
-      return wrap.childNodes.length ? wrap : null;
-    }
+    // Static, trusted icon markup (feather-style, matching the header's
+    // sun/moon icons) — never interpolates any server/model data, so
+    // setting it via innerHTML is safe.
+    const DOC_ICON_SVG =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>' +
+      '<polyline points="14 2 14 8 20 8"></polyline>' +
+      '<line x1="16" y1="13" x2="8" y2="13"></line>' +
+      '<line x1="16" y1="17" x2="8" y2="17"></line>' +
+      '<line x1="10" y1="9" x2="8" y2="9"></line></svg>';
+    const EXTERNAL_LINK_ICON_SVG =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+      '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>' +
+      '<polyline points="15 3 21 3 21 9"></polyline>' +
+      '<line x1="10" y1="14" x2="21" y2="3"></line></svg>';
 
-    function createDocLinkAnchor(link, cls) {
+    // One clickable "chip" for a single verified document link — a document
+    // icon, the real filename, and an external-link arrow, sized and
+    // colored to read as an obvious button rather than an inline text link.
+    // Doesn't repeat the doc label — that's shown once per group instead
+    // (see buildDoclinkGroup), so a doc with several files doesn't repeat
+    // its own name once per chip.
+    function createDoclinkChip(link) {
       const a = document.createElement("a");
       a.href = link.url;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
-      a.className = cls;
-      a.textContent = link.name;
+      a.className = "doclink-chip";
       a.title = link.name;
+
+      const icon = document.createElement("span");
+      icon.className = "doclink-chip-icon";
+      icon.innerHTML = DOC_ICON_SVG;
+      a.appendChild(icon);
+
+      const fileLine = document.createElement("span");
+      fileLine.className = "doclink-chip-file";
+      fileLine.textContent = link.name;
+      a.appendChild(fileLine);
+
+      const arrow = document.createElement("span");
+      arrow.className = "doclink-chip-arrow";
+      arrow.innerHTML = EXTERNAL_LINK_ICON_SVG;
+      a.appendChild(arrow);
+
+      return a;
+    }
+
+    // One cited document's group: its friendly label once, then a chip per
+    // file it resolves to (usually one, occasionally several).
+    function buildDoclinkGroup(docId, links) {
+      const group = document.createElement("div");
+      group.className = "doclink-group";
+
+      const title = document.createElement("div");
+      title.className = "doclink-group-title";
+      title.textContent = friendlyLabel(docId);
+      group.appendChild(title);
+
+      for (const link of links) {
+        group.appendChild(createDoclinkChip(link));
+      }
+      return group;
+    }
+
+    // Builds the whole "Verified document links" card section (see
+    // lib/documentLinks.js) — a distinctly tinted box, same visual weight as
+    // the copy-ready customer box, so a real clickable document is
+    // unmistakable rather than a small line of text easy to skim past.
+    // Returns null when there's nothing to show, so callers never have to
+    // special-case an empty section.
+    function buildDocumentLinksSection(documentLinks) {
+      if (!Array.isArray(documentLinks) || !documentLinks.length) return null;
+
+      const groups = [];
+      for (const entry of documentLinks) {
+        if (!entry || !Array.isArray(entry.links) || !entry.links.length) continue;
+        groups.push(buildDoclinkGroup(entry.docId, entry.links));
+      }
+      if (!groups.length) return null;
+
+      const sec = document.createElement("div");
+      sec.className = "card-sec doclinks";
+
+      const head = document.createElement("div");
+      head.className = "box-head";
+      const label = document.createElement("span");
+      label.className = "label";
+      const headIcon = document.createElement("span");
+      headIcon.className = "doclinks-head-icon";
+      headIcon.innerHTML = EXTERNAL_LINK_ICON_SVG;
+      label.appendChild(headIcon);
+      label.appendChild(document.createTextNode(groups.length === 1 ? "Verified document link" : "Verified document links"));
+      head.appendChild(label);
+      sec.appendChild(head);
+
+      const groupsWrap = document.createElement("div");
+      groupsWrap.className = "doclink-groups";
+      for (const group of groups) groupsWrap.appendChild(group);
+      sec.appendChild(groupsWrap);
+
+      return sec;
+    }
+
+    // A rail-sized version of the same verified-link button — full-width,
+    // teal-tinted, with a small link icon — so it reads as clickable at a
+    // glance rather than blending into the plain source label above it.
+    function createRailDoclink(link) {
+      const a = document.createElement("a");
+      a.href = link.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = "rail-doclink";
+      a.title = link.name;
+
+      const icon = document.createElement("span");
+      icon.className = "rail-doclink-icon";
+      icon.innerHTML = EXTERNAL_LINK_ICON_SVG;
+      a.appendChild(icon);
+
+      const text = document.createElement("span");
+      text.className = "rail-doclink-text";
+      text.textContent = link.name;
+      a.appendChild(text);
+
       return a;
     }
 
@@ -975,11 +1137,14 @@
         for (const id of sources) {
           const row = document.createElement("div");
           row.className = "rail-src";
+          const labelRow = document.createElement("div");
+          labelRow.className = "rail-src-label";
           const label = document.createElement("span");
           label.textContent = friendlyLabel(id);
-          row.appendChild(label);
+          labelRow.appendChild(label);
+          row.appendChild(labelRow);
           for (const link of linksByDocId.get(id) || []) {
-            row.appendChild(createDocLinkAnchor(link, "rail-src-link"));
+            row.appendChild(createRailDoclink(link));
           }
           railSourcesEl.appendChild(row);
         }
@@ -1195,6 +1360,13 @@
         card.appendChild(custSec);
       }
 
+      // Its own prominent, tinted section — placed right after the answer/
+      // customer wording and before the plain "Sources: ..." meta line, so a
+      // real clickable document is the first thing a rep who asked for one
+      // actually sees, not something to notice buried in muted text below.
+      const docLinksSec = buildDocumentLinksSection(data.document_links);
+      if (docLinksSec) card.appendChild(docLinksSec);
+
       const hasSources = Array.isArray(data.sources) && data.sources.length;
       const hasRelated = Array.isArray(data.related_documents) && data.related_documents.length;
       if (hasSources || hasRelated) {
@@ -1212,8 +1384,6 @@
           related.textContent = "Related: " + data.related_documents.join(", ");
           metaSec.appendChild(related);
         }
-        const docLinksEl = buildDocumentLinksEl(data.document_links);
-        if (docLinksEl) metaSec.appendChild(docLinksEl);
         card.appendChild(metaSec);
       }
 
