@@ -19,6 +19,7 @@
 //
 // Business logic lives in lib/ so it can be unit-tested without starting
 // this express app or calling the live Anthropic API — see test/.
+import fs from "fs";
 import path from "path";
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
@@ -39,12 +40,14 @@ import { ANSWER_TOOL, ANSWER_TOOL_NAME, fallbackAnswer } from "./lib/answerContr
 import { STATIC_INSTRUCTIONS } from "./lib/prompt.js";
 import { appendGap, readGaps, renderGapsPage } from "./lib/gapLog.js";
 import { runChatStream } from "./lib/chatStream.js";
+import { attachDocumentLinks } from "./lib/documentLinks.js";
 import { validateFeedbackRequest, appendFeedback, readFeedback, renderFeedbackPage } from "./lib/feedbackLog.js";
 import { isEmailAlertConfigured, buildDownvoteAlertEmail } from "./lib/emailAlert.js";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-5-20250929";
 const PORT = process.env.PORT || 3000;
 const KNOWLEDGE_DIR = path.join(process.cwd(), "knowledge");
+const SOURCES_META_PATH = path.join(KNOWLEDGE_DIR, "sources.meta.json");
 const GAPS_LOG_PATH = path.join(process.cwd(), "data", "knowledge-gaps.jsonl");
 const FEEDBACK_LOG_PATH = path.join(process.cwd(), "data", "feedback.jsonl");
 const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER;
@@ -72,6 +75,13 @@ if (authCheck.warning) {
 
 const KNOWLEDGE_FILES = loadAllKnowledgeFiles(KNOWLEDGE_DIR);
 const ALL_FILENAMES = [...KNOWLEDGE_FILES.keys()];
+
+// Loaded once at startup, same as the knowledge markdown files — this is the
+// server-side-only source of real document links (see lib/documentLinks.js).
+// It is never sent to the model; only the already-cited sources/
+// related_documents doc IDs are looked up against it after the model
+// replies.
+const SOURCES_META = JSON.parse(fs.readFileSync(SOURCES_META_PATH, "utf-8"));
 
 const missingKnowledgeFiles = findMissingKnowledgeFiles(KNOWLEDGE_FILES, KNOWLEDGE_INDEX, ALWAYS_INCLUDE);
 if (missingKnowledgeFiles.length > 0) {
@@ -160,7 +170,9 @@ app.post("/api/chat", async (req, res) => {
     tool_choice: { type: "tool", name: ANSWER_TOOL_NAME }
   });
 
-  const { data, isGenuineCannotAnswer } = await runChatStream(stream, writeFrame);
+  const { data, isGenuineCannotAnswer } = await runChatStream(stream, writeFrame, {
+    attachDocumentLinks: (answer) => attachDocumentLinks(answer, SOURCES_META)
+  });
 
   // Only a real, well-formed "cannot_answer" counts as a knowledge gap —
   // never a technical-failure fallbackAnswer(), which is a server problem,

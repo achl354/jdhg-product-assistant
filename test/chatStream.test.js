@@ -162,3 +162,39 @@ test("a malformed tool_use input (fails isWellFormedAnswer) resolves to fallback
   assert.equal(result.isGenuineCannotAnswer, false);
   assert.equal(result.data.status, "cannot_answer");
 });
+
+test("options.attachDocumentLinks, when provided, transforms data before both the final frame and the return value", async () => {
+  const finalInput = {
+    answer: "The HoverMatt has a 200kg SWL.",
+    status: "confirmed",
+    sources: ["hovermatt-usage-and-ifu.md"],
+    customer_ready: "",
+    related_documents: []
+  };
+  const stream = fakeStream({ finalContent: validToolUseContent(finalInput) });
+  const frames = [];
+
+  const result = await runChatStream(stream, (frame) => frames.push(frame), {
+    attachDocumentLinks: (data) => ({ ...data, document_links: [{ docId: data.sources[0], links: [] }] })
+  });
+
+  assert.deepEqual(result.data.document_links, [{ docId: "hovermatt-usage-and-ifu.md", links: [] }]);
+  assert.deepEqual(frames.at(-1).data.document_links, [{ docId: "hovermatt-usage-and-ifu.md", links: [] }]);
+  // The model-controlled fields must survive the transform untouched.
+  assert.equal(result.data.answer, finalInput.answer);
+});
+
+test("omitting options.attachDocumentLinks leaves data exactly as the model/fallback produced it", async () => {
+  const finalInput = {
+    answer: "Same as always.",
+    status: "confirmed",
+    sources: [],
+    customer_ready: "",
+    related_documents: []
+  };
+  const stream = fakeStream({ finalContent: validToolUseContent(finalInput) });
+
+  const result = await runChatStream(stream, () => {});
+
+  assert.deepEqual(result.data, finalInput);
+});

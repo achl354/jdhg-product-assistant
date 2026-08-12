@@ -455,6 +455,28 @@
     font-size: 11px;
     color: var(--muted);
   }
+  /* Server-attached, verified links (see lib/documentLinks.js) — never
+     model-generated. Rendered as a small indented list under the sources/
+     related lines rather than woven into them, so it's obvious these are
+     real clickable references, not just document names. */
+  .doc-links {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .doc-links-row {
+    font-size: 11px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .doc-links-label { color: var(--muted); }
+  .doc-link {
+    color: var(--customer-accent);
+    text-decoration: none;
+  }
+  .doc-link:hover { text-decoration: underline; }
 
   .feedback-row {
     display: flex;
@@ -576,7 +598,19 @@
     padding: 7px 9px;
     margin-bottom: 6px;
     word-break: break-word;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px;
   }
+  /* A server-verified link (see lib/documentLinks.js) attached to a rail
+     source row — never model-generated. */
+  .rail-src-link {
+    color: var(--customer-accent);
+    text-decoration: none;
+    font-size: 11px;
+  }
+  .rail-src-link:hover { text-decoration: underline; }
   .rail-follow {
     display: block;
     width: 100%;
@@ -876,12 +910,63 @@
       railRelatedEl.innerHTML = '<div class="rail-empty">Related documents will appear after a reply.</div>';
     }
 
+    // Turns data.document_links (an array of { docId, links: [{name, url}] })
+    // into a Map for O(1) lookup by docId — [] when absent, never throws on
+    // an unexpected shape. These links are always server-attached and
+    // verified (see lib/documentLinks.js) — this function never invents one.
+    function documentLinksByDocId(data) {
+      const map = new Map();
+      for (const entry of Array.isArray(data.document_links) ? data.document_links : []) {
+        if (entry && typeof entry.docId === "string" && Array.isArray(entry.links)) {
+          map.set(entry.docId, entry.links);
+        }
+      }
+      return map;
+    }
+
+    // Renders data.document_links (see lib/documentLinks.js) as a small list
+    // of real, clickable references under the response card's sources/
+    // related lines — one row per cited document that has a verified link
+    // on file. Returns null (nothing to append) when there's nothing to
+    // show, so callers never have to special-case an empty section.
+    function buildDocumentLinksEl(documentLinks) {
+      if (!Array.isArray(documentLinks) || !documentLinks.length) return null;
+      const wrap = document.createElement("div");
+      wrap.className = "doc-links";
+      for (const entry of documentLinks) {
+        if (!entry || !Array.isArray(entry.links) || !entry.links.length) continue;
+        const row = document.createElement("div");
+        row.className = "doc-links-row";
+        const label = document.createElement("span");
+        label.className = "doc-links-label";
+        label.textContent = friendlyLabel(entry.docId) + ":";
+        row.appendChild(label);
+        for (const link of entry.links) {
+          row.appendChild(createDocLinkAnchor(link, "doc-link"));
+        }
+        wrap.appendChild(row);
+      }
+      return wrap.childNodes.length ? wrap : null;
+    }
+
+    function createDocLinkAnchor(link, cls) {
+      const a = document.createElement("a");
+      a.href = link.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.className = cls;
+      a.textContent = link.name;
+      a.title = link.name;
+      return a;
+    }
+
     // Mirrors the latest reply's sources/related documents in the rail —
     // a desktop-only convenience. The response card itself always shows the
     // same information inline, so this is never the only place it lives.
     function updateRail(data) {
       const sources = Array.isArray(data.sources) ? data.sources : [];
       const related = Array.isArray(data.related_documents) ? data.related_documents : [];
+      const linksByDocId = documentLinksByDocId(data);
 
       railSourcesEl.innerHTML = "";
       if (!sources.length) {
@@ -890,7 +975,12 @@
         for (const id of sources) {
           const row = document.createElement("div");
           row.className = "rail-src";
-          row.textContent = friendlyLabel(id);
+          const label = document.createElement("span");
+          label.textContent = friendlyLabel(id);
+          row.appendChild(label);
+          for (const link of linksByDocId.get(id) || []) {
+            row.appendChild(createDocLinkAnchor(link, "rail-src-link"));
+          }
           railSourcesEl.appendChild(row);
         }
       }
@@ -1122,6 +1212,8 @@
           related.textContent = "Related: " + data.related_documents.join(", ");
           metaSec.appendChild(related);
         }
+        const docLinksEl = buildDocumentLinksEl(data.document_links);
+        if (docLinksEl) metaSec.appendChild(docLinksEl);
         card.appendChild(metaSec);
       }
 

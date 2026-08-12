@@ -55,13 +55,56 @@ test("marketing_collateral sources are never classified with a confirmed (IFU/re
 
 test("no source entry invents an approval workflow that was never actually confirmed", () => {
   // Per the ingestion rule: no formal JDHG approval record, named approver,
-  // external-use clearance, or stable document-control link was available
-  // for any source at ingestion time, so these fields must stay
-  // needs_confirmation everywhere rather than being guessed at.
+  // or external-use clearance was available for any source at ingestion
+  // time, so these fields must stay needs_confirmation everywhere rather
+  // than being guessed at. secure_document_link is different — it's since
+  // been populated with real, verified links for documents whose canonical
+  // SharePoint copy was located (see the next two tests) — so it's checked
+  // separately, for shape rather than for a fixed value.
   for (const [id, entry] of Object.entries(sourcesMeta.sources)) {
-    for (const field of ["approval_status", "approver_owner", "external_use_permission", "secure_document_link"]) {
+    for (const field of ["approval_status", "approver_owner", "external_use_permission"]) {
       assert.equal(entry[field], "needs_confirmation", `expected ${id}.${field} to be "needs_confirmation", got "${entry[field]}"`);
     }
+  }
+});
+
+test("every secure_document_link is either 'needs_confirmation' or a non-empty array of real {name, url} links", () => {
+  // Guards the shape documentLinks.js relies on: never a bare string URL,
+  // never an empty array pretending to be "resolved", never a link object
+  // missing a field. A model never writes to this file, so this is purely a
+  // data-integrity check on human/tooling-curated content.
+  for (const [id, entry] of Object.entries(sourcesMeta.sources)) {
+    const link = entry.secure_document_link;
+    if (link === "needs_confirmation") continue;
+    assert.ok(Array.isArray(link) && link.length > 0, `expected ${id}.secure_document_link to be "needs_confirmation" or a non-empty array, got ${JSON.stringify(link)}`);
+    for (const entry2 of link) {
+      assert.equal(typeof entry2.name, "string", `expected every link on ${id} to have a string name`);
+      assert.ok(entry2.name.length > 0, `expected every link name on ${id} to be non-empty`);
+      assert.match(entry2.url, /^https:\/\/jdhealthcare(-my)?\.sharepoint\.com\//, `expected every link url on ${id} to be a jdhealthcare SharePoint URL, got "${entry2.url}"`);
+    }
+  }
+});
+
+test("documents with no findable canonical SharePoint copy stay needs_confirmation rather than a guessed link", () => {
+  // These specific entries were searched for during the document-links
+  // effort (2026-08-12) and deliberately left unresolved: either no
+  // canonical shared-library copy exists (only personal OneDrive/draft
+  // copies), the correct document itself is ambiguous, or the source isn't
+  // a shareable file at all. Regressing any of these to a fabricated link
+  // would be worse than leaving it unresolved.
+  const expectedUnresolved = [
+    "_sources.md", // the manifest itself, not a product document
+    "artg-certificate.md", // only a personal-OneDrive copy found
+    "end-of-service-guidance.md", // only a draft .docx found
+    "product-range-and-faq.md", // internal training summary, not a single shareable file
+    "competitive-positioning-hovermatt-trenguard.md", // a Teams chat message, not a file
+    "easiair-usage-and-ifu.md", // only drafts/personal-OneDrive copies found
+    "easimove-artg-and-regulatory.md", // the confirmed ARTG number (528531) has no findable link; the other (343300) is not confirmed to apply
+    "easimove-validation-summary.md", // only Teams-chat-file/personal-OneDrive copies found
+    "competitive-positioning-easimove.md" // Document 1 is INTERNAL USE ONLY; never link it externally
+  ];
+  for (const id of expectedUnresolved) {
+    assert.equal(sourcesMeta.sources[id].secure_document_link, "needs_confirmation", `expected ${id}.secure_document_link to still be "needs_confirmation"`);
   }
 });
 
@@ -134,4 +177,9 @@ test("the system prompt instructs the model to never silently resolve a flagged 
 
 test("the system prompt distinguishes marketing collateral from IFU/regulatory-grade evidence", () => {
   assert.match(STATIC_INSTRUCTIONS, /Marketing collateral[\s\S]*supports status supported at most/);
+});
+
+test("the system prompt tells the model never to generate a document link itself", () => {
+  assert.match(STATIC_INSTRUCTIONS, /never type, construct, or guess a URL yourself/);
+  assert.match(STATIC_INSTRUCTIONS, /linked below/);
 });

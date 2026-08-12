@@ -14,7 +14,7 @@
       "external_use_permission": "Whether this document is cleared to quote/share externally (e.g. to a customer) vs. internal-JDHG-only. 'needs_confirmation' everywhere — not invented.",
       "current_or_superseded": "One of: current (most recent copy found in the source location as of last_reviewed_date — NOT a confirmation against a formal document-control register), superseded, needs_confirmation.",
       "known_location": "Where the source document was found (SharePoint/OneDrive folder path), distinct from secure_document_link.",
-      "secure_document_link": "A stable, access-controlled URL to the source document from a JDHG system of record. 'needs_confirmation' everywhere at ingestion time — the MCP session URIs used to fetch these are transient, not stable shareable links.",
+      "secure_document_link": "Either the string 'needs_confirmation' (no verified shareable link on file — this is the default at ingestion time, since the MCP session URIs used to fetch a document are transient, not stable shareable links), or an array of { name, url } objects — one per physical source document a knowledge file merges (most knowledge files map to a single document; some marketing files merge several PDFs, each contributing its own entry). Populated on 2026-08-12 by re-locating each source document's current canonical copy on the main company SharePoint site (or the original JDSalesMarketingHub-MarketingMaterial site where that's where a document actually lives) and recording its real webUrl — see lib/documentLinks.js for how these are surfaced to reps. Left as 'needs_confirmation' where no canonical shared-library copy could be found (only a personal-OneDrive or draft copy existed), where the correct document was itself ambiguous (e.g. easimove-artg-and-regulatory.md — two ARTG certs exist and only one is confirmed applicable, but that one has no findable link), or where the source isn't a shareable file at all (the manifest, a Teams chat message, an INTERNAL USE ONLY document). A link here points at whatever revision is currently live in SharePoint, which is not always the exact revision the knowledge file's prose was written from — see revision_version/document_date for what the prose reflects, and MARKETING_RESYNC.md for the general re-sync caveat.",
       "known_conflicts": "Array of specific facts/claims where sources disagree or a single source is internally ambiguous. Empty array if none identified."
     },
     "generated": "2026-07-28"
@@ -97,7 +97,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint .../HoverTech (Supplier) Info/Manuals 2024",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "Hov_Man_HoverMatt_RevR_032426-JDHG.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/HoverTech/Hov_Man_HoverMatt_RevR_032426-JDHG.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "hoverjack-usage-and-ifu.md": {
@@ -113,7 +118,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint .../HoverTech (Supplier) Info/Manuals 2024",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "hov_HJManual_RevJ_050824.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Info From Suppliers/MH - Info From Suppliers (JD)/HoverTech (Supplier) Info/Manuals 2024/hov_HJManual_RevJ_050824.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "hoversling-usage-and-ifu.md": {
@@ -129,7 +139,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint .../HoverTech (Supplier) Info/Manuals 2024",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "Hov_HSManual-RevJ-11724.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Info From Suppliers/MH - Info From Suppliers (JD)/HoverTech (Supplier) Info/Manuals 2024/Hov_HSManual-RevJ-11724.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "air-supply-and-remaining-range-ifu.md": {
@@ -145,7 +160,28 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint .../HoverTech (Supplier) Info/Manuals 2024",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "Hov_Man_HT-Air2300_RevL_041426-JDHG.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/HoverTech/Hov_Man_HT-Air2300_RevL_041426-JDHG.pdf"
+        },
+        {
+          "name": "Hov_Q2Roller_UserManual_RevI_11724.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Info From Suppliers/MH - Info From Suppliers (JD)/HoverTech (Supplier) Info/Manuals 2024/Hov_Q2Roller_UserManual_RevI_11724.pdf"
+        },
+        {
+          "name": "Hov_Man_T-Burg_RevJ_032626-JDHG.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/HoverTech/Hov_Man_T-Burg_RevJ_032626-JDHG.pdf"
+        },
+        {
+          "name": "Hov_Man_SitAssistPRO_RevG_041726-JDHG.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/HoverTech/Hov_Man_SitAssistPRO_RevG_041726-JDHG.pdf"
+        },
+        {
+          "name": "Hov_Man_EMSEvacHoverJack_RevK_042026.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Info From Suppliers/MH - Info From Suppliers (JD)/HoverTech (Supplier) Info/2026/Hov_Man_EMSEvacHoverJack_RevK_042026.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "trenguard-artg-and-regulatory.md": {
@@ -161,7 +197,20 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "JD HealthCare Training Hub/TrenGuard; OPERATIONS/Admin/Certificates & Registrations/TGA Certificates",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "DA Surgical TrenGuard Trendelenburg ARTG#275210.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/OPERATIONS/Admin/Certificates & Registrations/TGA Certificates/JDHG TGA Certificates/DA Surgical TrenGuard Trendelenburg ARTG%23275210.pdf"
+        },
+        {
+          "name": "DA Surgical TrenGuard Pillow ARTG#290466.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/OPERATIONS/Admin/Certificates & Registrations/TGA Certificates/JDHG TGA Certificates/DA Surgical TrenGuard Pillow ARTG%23290466.pdf"
+        },
+        {
+          "name": "DA Surgical TrenGuard 450 Procedure Pack ARTG#290464.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/OPERATIONS/Admin/Certificates & Registrations/TGA Certificates/JDHG TGA Certificates/DA Surgical TrenGuard 450 Procedure Pack ARTG%23290464.pdf"
+        }
+      ],
       "known_conflicts": [
         "TrenGuard 600 Hybrid procedure pack's own ARTG number could not be confirmed from documents reviewed — only 290464 (450 pack) is referenced alongside the frame and pillows."
       ]
@@ -179,7 +228,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "JD HealthCare Training Hub",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "TS - User Guide - TrenGuard - JDHG061124.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/DA Surgical/TS - User Guide - TrenGuard - JDHG061124.pdf"
+        }
+      ],
       "known_conflicts": [
         "JDHG 2024 guide and D.A. Surgical 2015 IFU disagree on reverse-Trendelenburg use and warranty period — JDHG 2024 guide is treated as authoritative per explicit JDHG instruction, not left as an open conflict."
       ]
@@ -215,7 +269,16 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/NetZero Underpad, NetZero Curtain",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "A4 Flyer - NetZero Underpad - JDHG140525.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Net Zero Care/A4 Flyer - NetZero Underpad - JDHG140525.pdf"
+        },
+        {
+          "name": "A4 Flyer - NetZero Curtain - JDHG201125.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Net Zero Care/A4 Flyer - NetZero Curtain - JDHG201125.pdf"
+        }
+      ],
       "known_conflicts": [
         "Sustainability/volume statistics (e.g. '750,000,000 units/year', '40% fewer emissions') are marketing claims citing third-party sources, not independently verified by JDHG."
       ]
@@ -233,7 +296,32 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Hygenica",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/IC - A4 Booklet - Hygenica Curtains - JDHG310724.pdf"
+        },
+        {
+          "name": "Info Pack - Hygenica Curtains - JDHG300326.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/Info Pack - Hygenica Curtains - JDHG300326.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Disposable Hospital Blinds - JDHG300326.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/JDHG Flyer - Disposable Hospital Blinds - JDHG300326.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Hygenica Curtains - JDHG300326.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/JDHG Flyer - Hygenica Curtains - JDHG300326.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Roller Blind Ordering Details - JDHG300326.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/JDHG Flyer - Roller Blind Ordering Details - JDHG300326.pdf"
+        },
+        {
+          "name": "Roller Blinds Order Form - JDHG300326.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Hygenica Curtains/Roller Blinds Order Form - JDHG300326.pdf"
+        }
+      ],
       "known_conflicts": [
         "The 'Info Pack' PDF exceeded this ingestion pass's size limit and was not fully processed — booklet content captured is extensive but not confirmed exhaustive.",
         "Fantex efficacy figures are Hygenica-reported test results, not independently verified by JDHG."
@@ -252,7 +340,20 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Medsalv",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - Medsalv Reprosessing - JDHG050625.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Medsalv/JDHG Flyer - Medsalv Reprosessing - JDHG050625.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Medsalv How It Works (HoverMatt) - JDHG050625.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Medsalv/JDHG Flyer - Medsalv How It Works (HoverMatt) - JDHG050625.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Medsalv How It Works (Easimove) - JDHG050625.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Medsalv/JDHG Flyer - Medsalv How It Works (Easimove) - JDHG050625.pdf"
+        }
+      ],
       "known_conflicts": [
         "Program/sustainability figures (e.g. '92% waste reduction', '75% blended-code remanufactured content') are Medsalv/distributor-reported, not independently audited by JDHG.",
         "The specific ARTG number assigned to remanufactured devices was not stated in the source flyers — confirm with Medsalv/Regulatory before quoting one."
@@ -271,7 +372,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/MiniMaxx",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - Minimaxx Wheelchair - JDHG241024.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Minimaxx Wheelchair/JDHG Flyer - Minimaxx Wheelchair - JDHG241024.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "marketing/albacmat-flyer.md": {
@@ -287,7 +393,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/AlbacMat",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - AlbacMat - JDHG141124.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/AlbacMat/JDHG Flyer - AlbacMat - JDHG141124.pdf"
+        }
+      ],
       "known_conflicts": [
         "States 470kg Safe Working Load. The manufacturer manual (marketing/albacmat-manual-2019.md) states 500kg SWL with a 160kg tested safe load. Which figure is current/authoritative could not be determined from the documents reviewed — treat as needs_confirmation, do not average or pick one."
       ]
@@ -305,7 +416,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "needs_confirmation",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/AlbacMat",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "AlbacMat Manual 2019.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/AlbacMat/AlbacMat Manual 2019.pdf"
+        }
+      ],
       "known_conflicts": [
         "Dated 2019 with no confirmation a newer manufacturer edition doesn't exist — current_or_superseded is needs_confirmation, not current, for this reason.",
         "States 500kg Safe Working Load with 160kg tested safe load, vs. the current JDHG flyer's 470kg SWL (marketing/albacmat-flyer.md). Do not resolve this by picking one figure."
@@ -324,7 +440,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Carexia",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - Carexia FPVE - JDHG121124.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - Carexia FPVE - JDHG121124.pdf"
+        }
+      ],
       "known_conflicts": [
         "The source flyer states '200kg SWL (135kg in Trendelenburg position)' in its feature bullets, and separately 'Safe working load (fully reclined): 135kg' in its specification table. These may describe the same physical state or two different ones (Trendelenburg tilt vs. backrest fully reclined are not necessarily identical) — the single source document does not disambiguate. Do not present 135kg as definitively 'the Trendelenburg limit' or 'the fully-reclined limit' — mark needs_confirmation and refer the rep to JDHG/Regulatory."
       ]
@@ -342,7 +463,24 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/iMove",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - I-Move Range - JDHG230726.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - I-Move Range - JDHG230726.pdf"
+        },
+        {
+          "name": "JDHG Flyer - I-Move Stackable - JDHG2307.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - I-Move Stackable - JDHG2307.pdf"
+        },
+        {
+          "name": "JDHG Flyer - I-Move EZ-GO - JDHG230726.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - I-Move EZ-GO - JDHG230726.pdf"
+        },
+        {
+          "name": "JDHG Flyer - I-Move Bariatric EZ-GO - JDHG230726.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - I-Move Bariatric EZ-GO - JDHG230726.pdf"
+        }
+      ],
       "known_conflicts": [
         "EZ-GO Bariatric product code appears as both CFBM-EZTRSOv2 and CFBM-EZTSROv2 across two source flyers (range overview vs. Stackable-focused flyer) — likely a typo in one, but which one could not be determined. Confirm the correct code with JDHG before quoting it."
       ]
@@ -379,7 +517,20 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Raizer II",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - Raizer II - JDHG200726.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Raizer/JDHG Flyer - Raizer II - JDHG200726.pdf"
+        },
+        {
+          "name": "MH - JDHG Fact Sheet - Raizer II - JDHG200824.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Raizer/MH - JDHG Fact Sheet - Raizer II - JDHG200824.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Raizer Head Rest - JDHG251125.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Raizer/JDHG Flyer - Raizer Head Rest - JDHG251125.pdf"
+        }
+      ],
       "known_conflicts": [
         "'JD PROCare Raizer Service Flyer - JDHG281125.pdf' returned no extractable text (likely an image-only/scanned PDF) and was NOT processed into this knowledge file — flag to a rep asking about JD PROCare servicing specifics."
       ]
@@ -397,7 +548,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/AMIGO PEM",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "JDHG Flyer - Patient Escort Mover - JDHG241024.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/PEM - Patient Escort Mover/JDHG Flyer - Patient Escort Mover - JDHG241024.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "marketing/clavia.md": {
@@ -413,7 +569,20 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Clavia",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "CF - JDHG Flyer - Clavia FCD - JDHG120924.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/sites/JDSalesMarketingHub-MarketingMaterial/Shared Documents/Clavia/CF - JDHG Flyer - Clavia FCD - JDHG120924.pdf"
+        },
+        {
+          "name": "CF - JDHG Flyer - Clavia LSA Surgery - JDHG101024.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/sites/JDSalesMarketingHub-MarketingMaterial/Shared Documents/Clavia/CF - JDHG Flyer - Clavia LSA Surgery - JDHG101024.pdf"
+        },
+        {
+          "name": "JDHG Flyer - Clavia AMB7 FCD - JDHG121225.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/BMB Medical/JDHG Flyer - Clavia AMB7 FCD - JDHG121225.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "marketing/easi-rider-mover.md": {
@@ -429,7 +598,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: JDSalesMarketingHub-MarketingMaterial/Shared Documents/Easi Rider & Mover",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "OH - JDHG Flyer - Easi Rider & Easi Mover - JDHG040523.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/Easi Rider & Easi Mover/OH - JDHG Flyer - Easi Rider & Easi Mover - JDHG040523.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "easimove-pro-usage-and-ifu.md": {
@@ -445,7 +619,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "EasiMovePRO_IFU_RevA_1-1230726.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove/EasiMovePRO_IFU_RevA_1-1230726.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "easimove-spu-usage-and-ifu.md": {
@@ -461,7 +640,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint: Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "EasiMoveSPU_IFU_RevA_160626.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Manuals and Guides/DirectMed Pty Ltd/EasiMove/EasiMoveSPU_IFU_RevA_160626.pdf"
+        }
+      ],
       "known_conflicts": []
     },
     "easiair-usage-and-ifu.md": {
@@ -529,7 +713,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "SharePoint; flyers also user-uploaded",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "A4 - DMG EasiMove Air Transfer Mat - DM250204.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/EasiMove & EasiLift (DirectMed)/DMG Branded/A4 - DMG EasiMove Air Transfer Mat - DM250204.pdf"
+        }
+      ],
       "known_conflicts": [
         "\"Measured transfer performance\" and \"full-width coverage\" claims on the SPU flyer carry the manufacturer's own footnote that they're based on internal comparative testing and results may vary — not independently verified.",
         "Sustainability/recycled-content and compostable-packaging claims are DMG/JDHG-reported, not independently audited by JDHG."
@@ -548,7 +737,12 @@
       "external_use_permission": "needs_confirmation",
       "current_or_superseded": "current",
       "known_location": "User-uploaded files",
-      "secure_document_link": "needs_confirmation",
+      "secure_document_link": [
+        {
+          "name": "A4 - DMG EasiLift v2 APL - DM260430.pdf",
+          "url": "https://jdhealthcare.sharepoint.com/Shared Documents/SALES/Products/Marketing Materials/EasiMove & EasiLift (DirectMed)/DMG Branded/A4 - DMG EasiLift v2 APL - DM260430.pdf"
+        }
+      ],
       "known_conflicts": [
         "No manufacturer IFU or ARTG certificate was found for EasiLift at ingestion time — SWL and other specs are marketing-sourced only, not cross-confirmed against IFU-grade documentation.",
         "A DMG internal roadmap deck (June 2026) lists EasiLift's formal external launch as a future quarter (Q1 FY27) relative to when that deck was prepared, even though real flyer/comparison material already exists — confirm current commercial availability with JDHG/DMG before quoting to a customer.",
