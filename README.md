@@ -43,3 +43,18 @@ Edit or add files under `knowledge/`. Each file should be a self-contained markd
 - For TrenGuard, JDHG's 2024 User Guide is treated as authoritative over the manufacturer's original 2015 IFU where they conflict — see the note in `knowledge/trenguard-usage-and-ifu.md`.
 - Basic auth (single shared username/password) only — fine for a small pilot, not real per-user access control or audit logging. Revisit if this becomes permanent.
 - No conversation persistence — history only lives in the browser tab.
+
+
+## Enable JD Hub guidance
+
+Set `HUB_GUIDE_PATH` to the absolute path of an approved, non-empty UTF-8 Markdown
+guide mounted outside `public/` and the repository. Restart the app after changing
+the file. Keep internal guidance in private deployment storage. Without this
+setting the assistant runs in product-only mode. With the setting present the
+app requires both existing Basic Auth credentials and refuses to start if the
+guide cannot be read. All authenticated employees share the same Hub guidance.
+
+The guide should contain verified module/tab names, click paths, help text and
+KPI definitions. Exclude customer records, employee data and live business
+figures. The assistant uses the guide for Hub navigation and the existing
+curated documents for product claims. It can address both in one conversation.
