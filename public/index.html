@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-<title>HoverTech Product Assistant</title>
+<title>JDHG Product Assistant</title>
 <style>
   :root {
     --navy: #1B3F73;
@@ -102,11 +102,11 @@
 <body>
   <header>
     JDHG Product Assistant
-    <div class="sub">Pilot &middot; HoverTech &amp; TrenGuard &middot; answers only from a curated knowledge base</div>
+    <div class="sub">Answers grounded in curated JDHG sources</div>
   </header>
   <div id="log"></div>
   <form id="form">
-    <input id="input" type="text" placeholder="Ask about HoverTech or TrenGuard..." autocomplete="off" />
+    <input id="input" type="text" placeholder="Ask about JDHG products..." autocomplete="off" />
     <button id="send" type="submit">Send</button>
   </form>
 
@@ -126,7 +126,12 @@
       return div;
     }
 
-    addMessage("Hi, I'm the JDHG Product Assistant pilot. Ask me about specs, ARTG/GMDN details, usage steps, or warnings for the HoverTech range or TrenGuard.", "bot");
+    const welcome = addMessage("Ask me about JDHG product specifications, usage, or regulatory information.", "bot");
+    fetch("/api/capabilities").then((res) => res.json()).then(({ hubGuide }) => {
+      if (!hubGuide) return;
+      welcome.textContent = "Ask me about JDHG products or where to find information and tools in JD Hub.";
+      input.placeholder = "Ask about JDHG products or JD Hub...";
+    }).catch(() => {});
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -167,3 +172,4 @@
   </script>
 </body>
 </html>
+
