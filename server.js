@@ -311,8 +311,8 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`JDHG Product Q&A bot listening on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`JDHG Product Q&A bot listening on http://localhost:${server.address().port}`);
   console.log(`Knowledge base: ${ALL_FILENAMES.length} files in ${KNOWLEDGE_DIR}`);
   if (!BASIC_AUTH_USER || !BASIC_AUTH_PASS) {
     console.warn("WARNING: BASIC_AUTH_USER/BASIC_AUTH_PASS not set — running with no access control.");
