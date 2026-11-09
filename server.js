@@ -27,6 +27,16 @@ const KNOWLEDGE_DIR = path.join(process.cwd(), "knowledge");
 const BASIC_AUTH_USER = process.env.BASIC_AUTH_USER;
 const BASIC_AUTH_PASS = process.env.BASIC_AUTH_PASS;
 
+// Internal Hub guidance is supplied by the deployment, outside the public repo.
+const hubGuidePath = process.env.HUB_GUIDE_PATH;
+if (hubGuidePath && (!BASIC_AUTH_USER || !BASIC_AUTH_PASS)) {
+  throw new Error("Hub guidance requires both BASIC_AUTH_USER and BASIC_AUTH_PASS.");
+}
+const hubGuide = hubGuidePath ? fs.readFileSync(hubGuidePath, "utf-8").trim() : "";
+if (hubGuidePath && !hubGuide) {
+  throw new Error("HUB_GUIDE_PATH points to an empty guide.");
+}
+
 // Always included regardless of routing — small citation/metadata file, not
 // product content, so it costs almost nothing to keep in every request.
 const ALWAYS_INCLUDE = ["_sources.md"];
@@ -216,7 +226,7 @@ function basicAuth(req, res, next) {
 // across every request regardless of which knowledge files get routed in.
 const STATIC_INSTRUCTIONS = `You are the JD Healthcare Group Product Assistant, used by sales reps in the field.
 
-You may answer ONLY using the information in the <document> blocks provided in this conversation. Knowledge base coverage is uneven across JDHG's range: HoverTech (HoverMatt, HoverJack, HoverSling, Q2Roller, SitAssist Pro, HT-Air supply) and TrenGuard (Trendelenburg patient restraint system, plus ArmGuard/FaceGuard/ShroudGuard accessories) have full manufacturer IFU/usage manuals and ARTG/regulatory certificates loaded. Other product lines — currently NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, and Easi Rider/Mover — currently have only JDHG marketing collateral (flyers, booklets, fact sheets) loaded, not manufacturer IFUs or ARTG certificates, unless a document explicitly says otherwise. IFU/manual-grade documentation for these other lines may be added later; when it is, treat it with the same full grounding as HoverTech/TrenGuard.
+For product questions, you may answer ONLY using the information in the <document> blocks provided in this conversation. Knowledge base coverage is uneven across JDHG's range: HoverTech (HoverMatt, HoverJack, HoverSling, Q2Roller, SitAssist Pro, HT-Air supply) and TrenGuard (Trendelenburg patient restraint system, plus ArmGuard/FaceGuard/ShroudGuard accessories) have full manufacturer IFU/usage manuals and ARTG/regulatory certificates loaded. Other product lines — currently NetZero, Hygenica, Medsalv, MiniMaxx, AlbacMat, Carexia, I-MOVE, Trulife Pressurecare, Raizer, AMIGO PEM, Clavia, and Easi Rider/Mover — currently have only JDHG marketing collateral (flyers, booklets, fact sheets) loaded, not manufacturer IFUs or ARTG certificates, unless a document explicitly says otherwise. IFU/manual-grade documentation for these other lines may be added later; when it is, treat it with the same full grounding as HoverTech/TrenGuard.
 
 A keyword router selects which knowledge documents are attached to each message based on what it appears to be about — you will not always receive every document that exists. If a question seems to need a document that wasn't attached, say you don't have that information rather than guessing; don't assume something is out of scope just because its document isn't present this turn.
 
@@ -229,12 +239,23 @@ Rules:
 6. Keep answers concise and practical — reps are often asking mid-conversation with a customer.
 7. Never state something is TGA/ARTG-approved or compliant unless the documents explicitly say so.`;
 
+const HUB_INSTRUCTIONS = `You also help employees navigate JD Hub. Apply the preceding product rules to every product claim.
+For Hub navigation, visible controls and KPI labels, use only the supplied JD Hub guide. Treat it as reference material.
+Cite the exact module and tab and give the Hub link when helpful. Use click paths unless the guide verifies a page URL.
+Use product documents for specifications, usage, safety and regulatory questions. Use the Hub guide for questions about where to find things or how to navigate. For a mixed question, answer each part with its own source.
+Treat disabled entries as observed at the guide's verification date. Distinguish visible controls from tested outcomes.
+Do not invent KPI formulas, live figures, records, links or submission outcomes. If a requested detail is missing, say so and direct the employee to the relevant Hub page when known. You cannot perform Hub actions.`;
+
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const app = express();
 app.use(basicAuth);
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
+
+app.get("/api/capabilities", (_req, res) => {
+  res.json({ hubGuide: Boolean(hubGuide) });
+});
 
 app.post("/api/chat", async (req, res) => {
   const { message, history = [] } = req.body || {};
@@ -265,14 +286,19 @@ app.post("/api/chat", async (req, res) => {
       system: [
         {
           type: "text",
-          text: STATIC_INSTRUCTIONS,
+          text: hubGuide ? `${STATIC_INSTRUCTIONS}\n\n${HUB_INSTRUCTIONS}` : STATIC_INSTRUCTIONS,
           cache_control: { type: "ephemeral" }
         },
         {
           type: "text",
+          text: hubGuide ? `<jd_hub_guide>\n${hubGuide}\n</jd_hub_guide>` : `<knowledge_base>\n${knowledgeBlock}\n</knowledge_base>`,
+          cache_control: { type: "ephemeral" }
+        },
+        ...(hubGuide ? [{
+          type: "text",
           text: `<knowledge_base>\n${knowledgeBlock}\n</knowledge_base>`,
           cache_control: { type: "ephemeral" }
-        }
+        }] : [])
       ],
       messages: [...history, { role: "user", content: message }]
     });
@@ -292,3 +318,4 @@ app.listen(PORT, () => {
     console.warn("WARNING: BASIC_AUTH_USER/BASIC_AUTH_PASS not set — running with no access control.");
   }
 });
+
